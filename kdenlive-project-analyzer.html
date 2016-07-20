@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<!--
+     Kdenlive Project XML Analyzer
+     (c) 2016 Harald Albrecht
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+  -->
+<html>
+    <head>
+        <title>Kdenlive Project Disector</title>
+    </head>
+    
+    <body>
+        <form>
+            <p><input type="file" name="file" id="file" accept=".kdenlive"></input></p>
+        </form>
+
+        <p id="disection"></p>
+    </body>
+
+    <script>
+        document.getElementById("file").addEventListener("change", function(evt) {
+            var fn = evt.target.files[0];
+            var xmlfr = new FileReader();
+            xmlfr.onload = function(evt) {
+                var dp = new DOMParser();
+                var xml = dp.parseFromString(evt.target.result, "application/xml");
+                var xsltr = new XMLHttpRequest();
+                xsltr.open("GET", "kdenlive-project-analyzer.xsl", false);
+                xsltr.send(null);
+                var xslt = xsltr.responseXML;
+                var xsltp = new XSLTProcessor();
+                xsltp.importStylesheet(xslt);
+                var analysis = xsltp.transformToFragment(xml, document);
+                document.getElementById("disection").innerHTML = "";
+                document.getElementById("disection").appendChild(analysis);
+            };
+            xmlfr.readAsText(fn);
+        }, false)
+    </script>
+</html>
