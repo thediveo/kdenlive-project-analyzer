@@ -26,3 +26,25 @@ the regexp XPath extension.)
 
 You should now see a simple form with a file chooser. Simply select a .kdenlive project file ...
 and off you go. You should now see an analysis report shown below the form.
+
+# License
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program. If not, see <http://www.gnu.org/licenses/>.
+
+# Font Awesome License
+
+The Kdenlive Project Analyzer uses the awesome Font Awesome by Dave Gandy (http://fontawesome.io) to display
+useful icons, such as folders, film, and audio icons for better UI experience. For your convenience,
+this repository already contains the required CSS and font files. Font Awesome 4.6.3 itself is licensed
+under the SIL OFL 1.1, the CSS files are licensed under the MIT License.
