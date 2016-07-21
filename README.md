@@ -10,13 +10,19 @@ The analyzer shows the following information:
 - **timeline tracks configuration**, with track title and properties, such as muted, hidden, locked, and so on.
 - **internally added Transitions**, now this is something Kdenlive never shows you,
   but in case your project exhibits odd audio mixing or video compositing behavior, this may be the place to check:
-  - *video compositing transitions:* which ones and between which tracks, neatly sorted and grouped.
-  - *audio mixing transitions:* which ones on which tracks.
+  - **video compositing transitions:** which ones and between which tracks, neatly sorted and grouped.
+  - **audio mixing transitions:** which ones on which tracks.
 - **clip list**, just plain flat and sorted by name (no folders here).
 
-# Installation
+# Online Kdenlive Project Analyzer
 
-There is no specific installation; simply download/clone this project into its own directory.
+You can try our [Kdenlive Project Analyzer online](https://thediveo.github.io/kdenlive-project-analyzer/kdenlive-project-analyzer.html)
+(Firefox only), checking your Kdenlive project files. As the analyzer runs locally inside your web browser
+we and GitHub won't ever see your precious projects.
+
+# Local Installation
+
+There is no specific installation; simply download/clone this project into its own directory. That's all.
 
 # Starting the Analyzer
 
@@ -24,10 +30,12 @@ Simply load the file `kdenlive-project-analyzer.html` that's inside the main fol
 into your Firefox web browser. (Some other web browsers may work too, if they support XSLT 1.0 and
 the regexp XPath extension.)
 
-You should now see a simple form with a file chooser. Simply select a .kdenlive project file ...
+You should now see a simple form with a file chooser. Simply select a `.kdenlive` project file ...
 and off you go. You should now see an analysis report shown below the form.
 
-# License
+# Licenses
+
+## Kdenlive Project Analyzer License
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -42,9 +50,9 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-# Font Awesome License
+## Font Awesome License
 
 The Kdenlive Project Analyzer uses the awesome Font Awesome by Dave Gandy (http://fontawesome.io) to display
 useful icons, such as folders, film, and audio icons for better UI experience. For your convenience,
-this repository already contains the required CSS and font files. Font Awesome 4.6.3 itself is licensed
+this repository already contains the required CSS and font files. The font files of Font Awesome 4.6.3 itself are licensed
 under the SIL OFL 1.1, the CSS files are licensed under the MIT License.
