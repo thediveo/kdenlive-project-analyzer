@@ -29,7 +29,7 @@
                 encoding="utf-8"
                 indent="yes"/>
     
-    <xsl:variable name="version" select="'0.8.1'"/>
+    <xsl:variable name="version" select="'0.8.2'"/>
 
     <!-- A short introduction to the structure of Kdenlive project
          documents...
@@ -354,6 +354,12 @@
                             <xsl:with-param name="description">Locale to be used:</xsl:with-param>
                             <xsl:with-param name="select" select="/mlt/@LC_NUMERIC"/>
                         </xsl:call-template>
+                        <xsl:if test="/mlt/profile/@description">
+                            <xsl:call-template name="show-description-with-value">
+                                <xsl:with-param name="description">Profile description:</xsl:with-param>
+                                <xsl:with-param name="select" select="/mlt/profile/@description"/>
+                            </xsl:call-template>
+                        </xsl:if>
                         <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Profile:</xsl:with-param>
                             <xsl:with-param name="select">
