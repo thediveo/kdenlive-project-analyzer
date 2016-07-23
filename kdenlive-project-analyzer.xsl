@@ -638,13 +638,34 @@
                                 (RGB/A: <xsl:value-of select="$rgb"/>/<xsl:value-of select="substring(property[@name='resource']/text(),9,2)"/>)
                             </xsl:if>
                             
-                            <span class="anno-id"> (<i>clip id: <xsl:value-of select="$clipid"/></i>)</span>   
+                            <span class="anno-id"> (<i>length:
+                                <xsl:call-template name="show-timecode">
+                                    <xsl:with-param name="frames" select="@out"/>
+                                </xsl:call-template>,<xsl:text> </xsl:text>
+                                clip id: <xsl:value-of select="$clipid"/>
+                                </i>)</span>
                         </xsl:otherwise>
                     </xsl:choose>
                 </li>
             </xsl:if>
         </xsl:for-each>
     </xsl:template>
+
+
+    <!-- -->
+    <xsl:template name="show-timecode">
+        <xsl:param name="frames"/>
+
+        <xsl:variable name="fps" select="round(/mlt/profile/@frame_rate_num div /mlt/profile/@frame_rate_den)"/>
+
+        <xsl:variable name="ff" select="format-number($frames mod $fps, '00')"/>
+        <xsl:variable name="ss" select="format-number(floor($frames div $fps) mod 60, '00')"/>
+        <xsl:variable name="mm" select="format-number(floor(($frames div $fps) div 60) mod 60, '00')"/>
+        <xsl:variable name="hh" select="format-number(floor(($frames div $fps) div 3600), '00')"/>
+
+        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>:<xsl:value-of select="$ff"/></tt> (<xsl:value-of select="$frames"/>)
+    </xsl:template>
+
 
     <!-- Renders a clip icon depending on the clip's type. The following clip icons are
          differentiated:
@@ -748,18 +769,23 @@
                         <xsl:if test="property[@name='kdenlive:folderid']">
                             <xsl:variable name="foldersuffix" select="concat('.',property[@name='kdenlive:folderid'])"/>
                             <xsl:variable name="folder" select="$folders[substring(@name,string-length(@name) - string-length($foldersuffix) + 1)=$foldersuffix]"/>
-                            (<i>from folder</i>: <b><xsl:value-of select="$folder/text()"/></b>)
+                            (<i>length:
+                                <xsl:call-template name="show-timecode">
+                                    <xsl:with-param name="frames" select="@out"/>
+                                </xsl:call-template>,<xsl:text> </xsl:text>
+                            from folder</i>: <b><xsl:value-of select="$folder/text()"/></b>)
                         </xsl:if>
 
-                        producer id: <xsl:value-of select="@id"/>
+                        producer id: <xsl:value-of select="@id"/>,
+
+                        length: <xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="@out"/></xsl:call-template>,<xsl:text> </xsl:text>
                     </li>
                 </xsl:if>
             </xsl:for-each>
         </ul>
     </xsl:template>
     
-    
-    
+
     <!-- Matches all internally added transitions according to their a_track
          parameter. This key surely wins us the price for overly descriptive
          naming.
