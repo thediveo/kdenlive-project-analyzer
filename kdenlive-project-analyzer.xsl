@@ -32,7 +32,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.8.5'"/>
+    <xsl:variable name="version" select="'0.8.6'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -52,7 +52,7 @@
 
                 <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css"/>
 
-                <style type="text/css"><![CDATA[[
+                <style type="text/css"><![CDATA[
                     body {
                         font-family: Arial, sans-serif;
                     }
@@ -241,6 +241,10 @@
                             <xsl:with-param name="description">Color space:</xsl:with-param>
                             <xsl:with-param name="select" select="/mlt/profile/@colorspace"/>
                         </xsl:call-template>
+                        <xsl:call-template name="show-description-with-value">
+                            <xsl:with-param name="description">Number of timeline tracks:</xsl:with-param>
+                            <xsl:with-param name="copy"><xsl:value-of select="$timeline-num-tracks -1"/> <span class="anno"> (<i>+1 hidden built-in Black track</i>)</span></xsl:with-param>
+                        </xsl:call-template>
                     </tbody>
                 </table>
             </xsl:when>
@@ -250,18 +254,43 @@
         </xsl:choose>
     </xsl:template>
 
+
     <!-- Render a description with a value/selector in form of a table row
          consisting of exactly two columns: left col for description, right
          col for value.
+
+         Parameters:
+         * description: text to output in left cell.
+         * select: optional/preferred, the value to output in right cell.
+         * copy: optional, the node set to copy into the right cell.
       -->
     <xsl:template name="show-description-with-value">
-        <xsl:param name="select"/>
         <xsl:param name="description"/>
+        <xsl:param name="select"/>
+        <xsl:param name="copy"/>
         <tr>
             <td><xsl:value-of select="$description"/></td>
-            <td><xsl:value-of select="$select"/></td>
+            <td>
+                <xsl:choose>
+                    <xsl:when test="$select"><xsl:value-of select="$select"/></xsl:when>
+                    <xsl:otherwise><xsl:copy-of select="$copy"/></xsl:otherwise>
+                </xsl:choose>
+            </td>
         </tr>
     </xsl:template>
+
+
+    <!-- Gather all timeline tracks, and some associated information. This
+         later helps us avoiding using the same XPath code over and over
+         again, with some subtle bugs between different instances...
+      -->
+    <xsl:variable name="timeline-tracks" select="/mlt/tractor[@id='maintractor']/track"/>
+    <xsl:variable name="timeline-num-tracks" select="count($timeline-tracks)"/>
+    <xsl:variable name="timeline-num-user-tracks" select="$timeline-num-tracks -1"/>
+
+
+
+
 
     <!-- List all tracks
       -->
@@ -269,13 +298,13 @@
         <!-- Kdenlive's tracks are referenced as <tracks> elements inside the
              main <tractor> with id "maintractor". However, the Kdenlive
              tracks themselves are then represented as <playlists>. -->
-        <xsl:variable name="tracks" select="/mlt/tractor[@id='maintractor']/track"/>
-        <p><xsl:value-of select="count($tracks) - 1"/>(+1) timeline tracks:</p>
+        <p><xsl:value-of select="$timeline-num-user-tracks"/>(+1) timeline tracks:</p>
         <ul class="tracks">
-            <xsl:for-each select="$tracks">
+            <xsl:for-each select="$timeline-tracks">
                 <!-- reverse the order of track elements, thus being now in
                      order from bottom to top. This is necessary as MLT priorizes
-                     its tracks in the reverse sequence. -->
+                     its tracks in the reverse sequence: the last track is, in
+                     Kdenlive terms, the "topmost" timeline track. -->
                 <xsl:sort select="position()" data-type="number" order="descending"/>
                 <xsl:variable name="trackid" select="@producer"/>
                 <xsl:variable name="mlttrackno">
