@@ -3,6 +3,9 @@
      Kdenlive Project XML Analyzer
      (c) 2016 Harald Albrecht
 
+     For more details about the XML content of Kdenlive projects, please
+     see: http://thediveo-e.blogspot.com/2016/07/inside-kdenlive-projects.html
+
      This program is free software: you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
      the Free Software Foundation, either version 3 of the License, or
@@ -29,151 +32,9 @@
                 encoding="utf-8"
                 indent="yes"/>
     
-    <xsl:variable name="version" select="'0.8.1'"/>
-
-    <!-- A short introduction to the structure of Kdenlive project
-         documents...
-
-    
-         The MAINTRACTOR
-
-         The main anchor is the <tractor> element that is present
-         only once and is always uniquely identified as "maintractor".
-         The maintractor is necessary due to underlying MLT engine design
-         as the tractor is (simply spoken) making sure that frames get
-         pulled from all "tracks" - hence its name.
-
-         One important aspect of the tractor are the <tracks> it defines
-         (see below for more details). MLT tracks actually do correspond
-         with Kdenlive's tracks in the timeline. In the MLT model,
-         tracks are represented through playlists.
-
-         Another important aspect is that transitions do not live in
-         tracks, but instead in the main tractor! This is a special
-         design decision of MLT, and Kdenlive does a good job of
-         hiding it - to the benefit of us user/editors.
-
-         <tractor id="maintractor">
-           <track producer="track-id"/> - references tracks (track playlists)
-           <transition/>
-         </tractor>
-
-         Now it is time to introduce an important aspect of MLT, which is
-         Kdenlive's multimedia engine: the specific way <tractor>s work in
-         MLT. While MLT documents like to compare the <track>s (listed in
-         a <tractor>) to layers in image processing programs, such as The
-         Gimp, this simply is completely wrong. MLT tracks are not layers.
-
-         In Gimp (and other such software), each layer contains an image
-         and each such image may contain regions of transparency. Starting
-         with the lowest layer each other layer is composited onto the
-         lowest layer in some way. The simplest case is a normal blend,
-         that takes transparency into calculation. However awkward this
-         now may sound: each layer has an image, even if it is completely
-         transparent. Please keep this in mind.
-
-         Let's now turn to MLT and thus Kdenlive. Here, the <track>s form
-         some kind of an abstract stack. The topmost item on this stack is
-         a frame from the highest track at the current playhead position.
-
-         Without further measures (that is, transitions) even if the frame
-         on the highest track has transpareny, no other frame below in this
-         stack will ever be visible. (!!!)
+    <xsl:variable name="version" select="'0.8.5'"/>
 
 
-         MULTITRACK
-
-         Just as a sidenote: Kdenlive leaves out the <multitrack> inside
-         its "main bin" <tractor>.
-
-
-         TRACKs
-
-         Individual tracks are represented as MLT <playlist>s. However,
-         please be aware that playlists are much more universal in that
-         they are another type of producer (more on this later). So, not
-         every <playlist> is going to represent a track. The only way to
-         know which playlist actually is a track is through the main
-         tractor.
-
-         <playlist id="track-id">
-         </playlist>
-
-
-         BIN CLIPs
-
-         In Kdenlive, ...
- 
-         Beneath the surface, MLT doesn't know about clips, but only
-         producers.
-
-         simple/playlist/tractor
-
-         Kdenlive supports using either only video without audio, or audio
-         without video from an audio/video clip, and of course using both.
-         In order to implement audio-only and video-only from an audio/video
-         clips, Kdenlive needs to deploy multiple producers for the same
-         bin clip. The good news is that Kdenlive only creates such additional
-         producers when it needs to do so.
-
-         The <producer>s Kdenlive creates follow a certain naming scheme:
-         * "id": for an audio/video or video source clip, where id is an integer
-           "1", et cetera, assigned sequentially as clips are added to the
-           project bin.
-         * "id_ppp_audio": used for audio-only without the video from an
-           audio/video clip. We'll come to the ppp part shortly.
-         * "id_ppp_video": used for video-only without audio from an audio/video
-           clip.
-
-         
-         PRODUCERs
-
-
-         MLT service is "avformat-novalidate", ...
-
-
-         ID Namespaces
-
-         As we're dealing with a complex, non-hierarchical information model
-         represented in simple hierarchical XML, identification of key elements
-         and references to them plays a crucial role.
-
-         For uniquely identifying key elements, Kdenlive and MLT rely on the
-         XML builtin "id" attribute mechanism. When creating real-life id values,
-         Kdenlive works along these "namespaces":
-
-         * "1": identifies a clip <producer>. If this is an audio/video clip, then
-           it will produce both audio and video; if this is an audio clip, it will
-           only produce audio. ...
-
-         * "1_playlistX":
-
-         * "1_video": identifies a video-only <producer> for the bin clip with
-             the id of "1". Technically, this producer has the audio index set
-             to -1, that is, not using any audio "tracks".
-
-         * "1_playlistX_audio": identifies an audio-only <producer> for the bin
-             clip with the id of "1". Technically, this playlist has the video
-             index is set to -1, that is, not using any video "tracks".
- 
-         * "playlist0": identifies a Kdenlive track in the form of an MLT
-             <playlist>.
-
-         * "maintractor":
-
-         * "main bin":
-
-
-
-         PRODUCER Types
-
-         * avformat-novalidate
-         * pixbuf
-         * kdenlivetitle
-
-      -->
-    
-    
     <!-- We later need this key to group clips by their "name", where "name" is
          a slightly involved concept. A clip name is either its name as explicitly
          assigned by the user, or the filename+extension, but without its file path.
@@ -268,9 +129,9 @@
                 </style>
             </head>
             <body>
-                <h1>Kdenlive Project Analysis</h1>
+                <h1><img src="64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
                 
-                <p class="anno">Analysis script version: <xsl:value-of select="$version"/> / (c) Harald Albrecht</p>
+                <p class="anno">Analysis script version: <xsl:value-of select="$version"/> / (c) Harald Albrecht / <a href="https://thediveo.github.io/kdenlive-project-analyzer/kdenlive-project-analyzer.html">Online</a> / <a href="https://thediveo.github.io/kdenlive-project-analyzer/">Project on GitHub</a></p>
                 
                 <!-- Sanity checks -->
                 <!-- Not even remotely a Kdenlive project... -->
@@ -292,7 +153,11 @@
         </html>
     </xsl:template>
     
-    <!-- Main logic -->
+
+    <!-- This wires up the individual analysis sections and throws in some
+         explanatory texts that should help newcomers to better understand
+         and interpret the analysis results.
+      -->
     <xsl:template name="analyze-kdenlive-project">
         <h2><i class="fa fa-info-circle" aria-hidden="true"/> General Project Information</h2>
         <xsl:call-template name="show-kdenlive-project-info"/>
@@ -354,6 +219,12 @@
                             <xsl:with-param name="description">Locale to be used:</xsl:with-param>
                             <xsl:with-param name="select" select="/mlt/@LC_NUMERIC"/>
                         </xsl:call-template>
+                        <xsl:if test="/mlt/profile/@description">
+                            <xsl:call-template name="show-description-with-value">
+                                <xsl:with-param name="description">Profile description:</xsl:with-param>
+                                <xsl:with-param name="select" select="/mlt/profile/@description"/>
+                            </xsl:call-template>
+                        </xsl:if>
                         <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Profile:</xsl:with-param>
                             <xsl:with-param name="select">
@@ -632,13 +503,34 @@
                                 (RGB/A: <xsl:value-of select="$rgb"/>/<xsl:value-of select="substring(property[@name='resource']/text(),9,2)"/>)
                             </xsl:if>
                             
-                            <span class="anno-id"> (<i>clip id: <xsl:value-of select="$clipid"/></i>)</span>   
+                            <span class="anno-id"> (<i>length:
+                                <xsl:call-template name="show-timecode">
+                                    <xsl:with-param name="frames" select="@out"/>
+                                </xsl:call-template>,<xsl:text> </xsl:text>
+                                clip id: <xsl:value-of select="$clipid"/>
+                                </i>)</span>
                         </xsl:otherwise>
                     </xsl:choose>
                 </li>
             </xsl:if>
         </xsl:for-each>
     </xsl:template>
+
+
+    <!-- -->
+    <xsl:template name="show-timecode">
+        <xsl:param name="frames"/>
+
+        <xsl:variable name="fps" select="round(/mlt/profile/@frame_rate_num div /mlt/profile/@frame_rate_den)"/>
+
+        <xsl:variable name="ff" select="format-number($frames mod $fps, '00')"/>
+        <xsl:variable name="ss" select="format-number(floor($frames div $fps) mod 60, '00')"/>
+        <xsl:variable name="mm" select="format-number(floor(($frames div $fps) div 60) mod 60, '00')"/>
+        <xsl:variable name="hh" select="format-number(floor(($frames div $fps) div 3600), '00')"/>
+
+        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>:<xsl:value-of select="$ff"/></tt> (<xsl:value-of select="$frames"/>)
+    </xsl:template>
+
 
     <!-- Renders a clip icon depending on the clip's type. The following clip icons are
          differentiated:
@@ -742,18 +634,23 @@
                         <xsl:if test="property[@name='kdenlive:folderid']">
                             <xsl:variable name="foldersuffix" select="concat('.',property[@name='kdenlive:folderid'])"/>
                             <xsl:variable name="folder" select="$folders[substring(@name,string-length(@name) - string-length($foldersuffix) + 1)=$foldersuffix]"/>
-                            (<i>from folder</i>: <b><xsl:value-of select="$folder/text()"/></b>)
+                            (<i>length:
+                                <xsl:call-template name="show-timecode">
+                                    <xsl:with-param name="frames" select="@out"/>
+                                </xsl:call-template>,<xsl:text> </xsl:text>
+                            from folder</i>: <b><xsl:value-of select="$folder/text()"/></b>)
                         </xsl:if>
 
-                        producer id: <xsl:value-of select="@id"/>
+                        producer id: <xsl:value-of select="@id"/>,
+
+                        length: <xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="@out"/></xsl:call-template>,<xsl:text> </xsl:text>
                     </li>
                 </xsl:if>
             </xsl:for-each>
         </ul>
     </xsl:template>
     
-    
-    
+
     <!-- Matches all internally added transitions according to their a_track
          parameter. This key surely wins us the price for overly descriptive
          naming.
@@ -769,84 +666,96 @@
         <!-- Get all internally added transitions which are NOT audio mixers. This
              helps us with the different kind of compositing transitions currently
              used by Kdenlive. In particular:
-             * frei0r.cairoblend
+             * composite
              * movit.###
              * qtblend
+             * frei0r.cairoblend
           -->
         <xsl:variable name="comptransitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][not(property[@name='mlt_service']/text()='mix')]"/>
         <xsl:variable name="trackscount" select="count(/mlt/tractor[@id='maintractor']/track)-1"/>
 
-        <xsl:value-of select="count($comptransitions)"/> internally added automatic compositing transitions.
-        
-        <xsl:for-each select="$comptransitions">
-            <!-- sort all implicitly added transitions by their a_track
-                 parameter, so that we get groups of compositing. Yes,
-                 the famous Muenchian method on the horizon...
-              -->
-            <xsl:sort select="property[@name='a_track']/text()" data-type="number" order="descending"/>
+        <xsl:choose>
+            <xsl:when test="count($comptransitions) = 0">
+                This project has no internally added automatic compositing transitions. There are several different reasons as to why there are no such transitions present:
+                <ul>
+                    <li>Kdenlive version 16.08+ projects with the timeline compositing mode set to "None".</li>
+                    <li>Kdenlive version 15.08-16.04 projects with all video tracks set to opaque mode.</li>
+                    <li>Kdenlive version 15.04 projects don't support automatic compositing, that is, transparent tracks.</li>
+                </ul>
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="count($comptransitions)"/> internally added automatic compositing transitions.
 
-            <xsl:variable name="atrack" select="property[@name='a_track']"/>
-            <xsl:variable name="compositetracksbyatrack" select="key('internal-composite-transition-by-a-track',$atrack)"/>
+                <xsl:for-each select="$comptransitions">
+                    <!-- sort all implicitly added transitions by their a_track
+                         parameter, so that we get groups of compositing. Yes,
+                         the famous Muenchian method on the horizon...
+                      -->
+                    <xsl:sort select="property[@name='a_track']/text()" data-type="number" order="descending"/>
 
-            <xsl:if test="generate-id() = generate-id($compositetracksbyatrack[1])">
-                <!-- MLT transitions work on MLT track indices, which are 0-based,
-                     bottom to top track. In order to later get the proper track
-                     title we start with the B track MLT index for starters.
-                  -->
-                <xsl:variable name="atrackmltidx" select="number(property[@name='a_track']/text())"/>
-                <!-- Next, get the track id, which is, by the way, something along
-                     the lines of "playlist#". The track id allows us to locate the
-                     <playlist> acting as a track.
-                  -->
-                <xsl:variable name="atrackid" select="/mlt/tractor[@id='maintractor']/track[$atrackmltidx+1]/@producer"/>
-                <!-- Using the track id we can now look up the title as specified
-                     inside the <playlist> track element, using one of the many
-                     <property> child elements: the one being 'kdenlive:track_name'.
-                  -->
-                <xsl:variable name="atracktitle" select="/mlt/playlist[@id=$atrackid]/property[@name='kdenlive:track_name']/text()"/>
-                
-                <ul class="tracks">
-                    <xsl:for-each select="$compositetracksbyatrack">
-                        <xsl:sort select="property[@name='b_track']/text()" data-type="number" order="descending"/>
+                    <xsl:variable name="atrack" select="property[@name='a_track']"/>
+                    <xsl:variable name="compositetracksbyatrack" select="key('internal-composite-transition-by-a-track',$atrack)"/>
 
+                    <xsl:if test="generate-id() = generate-id($compositetracksbyatrack[1])">
                         <!-- MLT transitions work on MLT track indices, which are 0-based,
                              bottom to top track. In order to later get the proper track
                              title we start with the B track MLT index for starters.
                           -->
-                        <xsl:variable name="btrackmltidx" select="number(property[@name='b_track']/text())"/>
+                        <xsl:variable name="atrackmltidx" select="number(property[@name='a_track']/text())"/>
                         <!-- Next, get the track id, which is, by the way, something along
                              the lines of "playlist#". The track id allows us to locate the
                              <playlist> acting as a track.
                           -->
-                        <xsl:variable name="btrackid" select="/mlt/tractor[@id='maintractor']/track[$btrackmltidx+1]/@producer"/>
+                        <xsl:variable name="atrackid" select="/mlt/tractor[@id='maintractor']/track[$atrackmltidx+1]/@producer"/>
                         <!-- Using the track id we can now look up the title as specified
                              inside the <playlist> track element, using one of the many
                              <property> child elements: the one being 'kdenlive:track_name'.
                           -->
-                        <xsl:variable name="btracktitle" select="/mlt/playlist[@id=$btrackid]/property[@name='kdenlive:track_name']/text()"/>
-                        <li>
-                            <i class="fa fa-clone" aria-hidden="true" title="internally added mixing transition"/>&#160;&#160;
-                            <xsl:choose>
-                                <xsl:when test="property[@name='disable']/text() = '1'">
-                                    <i class="fa fa-square-o anno-opaque"/>&#160;
-                                </xsl:when>
-                                <xsl:otherwise>
-                                    <i class="fa fa-delicious anno-composite"/>&#160;
-                                </xsl:otherwise>
-                            </xsl:choose>
-                            <b><xsl:value-of select="$btracktitle"/></b>
-                            <span class="anno"> (<i>internal transition id: "<xsl:value-of select="@id"/>", MLT track indices B/A: <xsl:value-of select="$btrackmltidx"/>/<xsl:value-of select="$atrackmltidx"/></i>)</span>
-                        </li>
-                    </xsl:for-each>
-                    <li>
-                        <i class="fa fa-fast-forward fa-rotate-90" aria-hidden="true"/>&#160; onto <b><xsl:value-of select="$atracktitle"/></b>
-                        <span class="anno"> (<i>MLT track index: <xsl:value-of select="$atrackmltidx"/></i>)</span>
-                    </li>
-                </ul>
-            </xsl:if>
+                        <xsl:variable name="atracktitle" select="/mlt/playlist[@id=$atrackid]/property[@name='kdenlive:track_name']/text()"/>
 
-        </xsl:for-each>
-        
+                        <ul class="tracks">
+                            <xsl:for-each select="$compositetracksbyatrack">
+                                <xsl:sort select="property[@name='b_track']/text()" data-type="number" order="descending"/>
+
+                                <!-- MLT transitions work on MLT track indices, which are 0-based,
+                                     bottom to top track. In order to later get the proper track
+                                     title we start with the B track MLT index for starters.
+                                  -->
+                                <xsl:variable name="btrackmltidx" select="number(property[@name='b_track']/text())"/>
+                                <!-- Next, get the track id, which is, by the way, something along
+                                     the lines of "playlist#". The track id allows us to locate the
+                                     <playlist> acting as a track.
+                                  -->
+                                <xsl:variable name="btrackid" select="/mlt/tractor[@id='maintractor']/track[$btrackmltidx+1]/@producer"/>
+                                <!-- Using the track id we can now look up the title as specified
+                                     inside the <playlist> track element, using one of the many
+                                     <property> child elements: the one being 'kdenlive:track_name'.
+                                  -->
+                                <xsl:variable name="btracktitle" select="/mlt/playlist[@id=$btrackid]/property[@name='kdenlive:track_name']/text()"/>
+                                <li>
+                                    <i class="fa fa-clone" aria-hidden="true" title="internally added mixing transition"/>&#160;&#160;
+                                    <xsl:choose>
+                                        <xsl:when test="property[@name='disable']/text() = '1'">
+                                            <i class="fa fa-square-o anno-opaque"/>&#160;
+                                        </xsl:when>
+                                        <xsl:otherwise>
+                                            <i class="fa fa-delicious anno-composite"/>&#160;
+                                        </xsl:otherwise>
+                                    </xsl:choose>
+                                    <b><xsl:value-of select="$btracktitle"/></b>
+                                    <span class="anno"> (<i>internal transition id: "<xsl:value-of select="@id"/>", MLT track indices B/A: <xsl:value-of select="$btrackmltidx"/>/<xsl:value-of select="$atrackmltidx"/>, type: <xsl:value-of select="property[@name='mlt_service']"/></i>)</span>
+                                </li>
+                            </xsl:for-each>
+                            <li>
+                                <i class="fa fa-fast-forward fa-rotate-90" aria-hidden="true"/>&#160; onto <b><xsl:value-of select="$atracktitle"/></b>
+                                <span class="anno"> (<i>MLT track index: <xsl:value-of select="$atrackmltidx"/></i>)</span>
+                            </li>
+                        </ul>
+                    </xsl:if>
+
+                </xsl:for-each>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
     
