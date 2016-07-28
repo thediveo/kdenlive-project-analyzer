@@ -22,7 +22,7 @@
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:regexp="http://exslt.org/regular-expressions">
-    
+
     <!-- Produce HTML5 document on an XSLT processor which does not
          support disable-output-escaping in order to generate the
          HTML5 !DOCTYPE. HTML5 thus defines a legacy doctype.
@@ -31,7 +31,7 @@
                 doctype-system="about:legacy-compat"
                 encoding="utf-8"
                 indent="yes"/>
-    
+
     <xsl:variable name="version" select="'0.8.5'"/>
 
 
@@ -40,8 +40,8 @@
          assigned by the user, or the filename+extension, but without its file path.
       -->
     <xsl:key name="clipkey" match="producer" use="substring(concat(regexp:replace(property[@name='resource'],'.*/','gi',''),property[@name='kdenlive:clipname']),1,1)"/>
-    
-    
+
+
     <!-- Generate the XHTML document head and body as we just start disecting
          the MLT XML document
       -->
@@ -49,20 +49,20 @@
         <html>
             <head>
                 <title>Kdenlive Project Disection</title>
-    
+
                 <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css"/>
-                
+
                 <style type="text/css">
                     body {
                         font-family: Arial, sans-serif;
                     }
-                    
+
                     h2 {
                         margin-top: 2.5ex;
                         padding-bottom: 0.2ex;
                         border-bottom: solid #aaa 0.2ex;
                     }
-                    
+
                     h3 {
                         max-width: 15em;
                         margin-top: 3ex;
@@ -70,13 +70,13 @@
                         border-bottom: solid #aaa 0.1ex;
                     }
 
-                    ul.project-bin-contents, 
+                    ul.project-bin-contents,
                     ul.project-bin-contents ul,
                     ul.project-clips,
                     ul.tracks {
                         list-style: none;
                     }
-                    
+
                     ul.project-bin-contents,
                     ul.project-clips,
                     ul.tracks {
@@ -86,7 +86,7 @@
                     ul.project-bin-contents ul {
                         padding-left: 2em;
                     }
-                    
+
                     ul.tracks li {
                         border-top: 1px dotted #aaa;
                         padding-top: .75ex;
@@ -94,45 +94,45 @@
                         padding-left: 0.75em;
                         padding-right: 0.75em;
                     }
-                    
+
                     ul.tracks li:last-child {
                         border-bottom: 1px dotted #aaa;
                     }
-                    
+
                     li {
                         padding-top: 0.6ex;
                     }
-                    
+
                     .error,
                     .warning {
                         font-weight: bolder;
                         color: #800;
                     }
-                                        
+
                     .anno-id, .anno {
                         color: #777;
                     }
-                    
+
                     .anno-unlocked,
                     .anno-opaque,
                     .anno-visible,
                     .anno-audible {
                         color: #777;
                     }
-                    
+
                     .anno-locked,
                     .anno-hidden,
                     .anno-muted {
                         color: #900;
                     }
-                    
+
                 </style>
             </head>
             <body>
                 <h1><img src="64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
-                
+
                 <p class="anno">Analysis script version: <xsl:value-of select="$version"/> / (c) Harald Albrecht / <a href="https://thediveo.github.io/kdenlive-project-analyzer/kdenlive-project-analyzer.html">Online</a> / <a href="https://thediveo.github.io/kdenlive-project-analyzer/">Project on GitHub</a></p>
-                
+
                 <!-- Sanity checks -->
                 <!-- Not even remotely a Kdenlive project... -->
                 <xsl:choose>
@@ -152,7 +152,7 @@
             </body>
         </html>
     </xsl:template>
-    
+
 
     <!-- This wires up the individual analysis sections and throws in some
          explanatory texts that should help newcomers to better understand
@@ -177,11 +177,11 @@
         <xsl:call-template name="video-compositing"/>
         <xsl:call-template name="audio-mixing"/>
 
-        <h2><i class="fa fa-th" aria-hidden="true"/> Clip List</h2>
+        <h2><i class="fa fa-th" aria-hidden="true"/> Master Clip List</h2>
         <p>All project bin clips, flat, sorted by their names.</p>
         <xsl:call-template name="list-all-clips"/>
     </xsl:template>
-    
+
     <!-- Display general information about this Kdenlive project.
       -->
     <xsl:template name="show-kdenlive-project-info">
@@ -229,11 +229,11 @@
                             <xsl:with-param name="description">Profile:</xsl:with-param>
                             <xsl:with-param name="select">
                                 <xsl:value-of select="/mlt/profile/@width"/>&#215;<xsl:value-of select="/mlt/profile/@height"/>,
-                                
+
                                 <xsl:value-of select="/mlt/profile/@display_aspect_num"/>:<xsl:value-of select="/mlt/profile/@display_aspect_den"/>,
-                                
+
                                 <xsl:value-of select="/mlt/profile/@frame_rate_num"/>/<xsl:value-of select="/mlt/profile/@frame_rate_den"/> frames/s,
-                                
+
                                 <xsl:value-of select="/mlt/profile/@sample_aspect_num"/>:<xsl:value-of select="/mlt/profile/@sample_aspect_den"/> pixel aspect ratio
                             </xsl:with-param>
                         </xsl:call-template>
@@ -249,11 +249,11 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
-    
+
     <!-- Render a description with a value/selector in form of a table row
          consisting of exactly two columns: left col for description, right
          col for value.
-      -->  
+      -->
     <xsl:template name="show-description-with-value">
         <xsl:param name="select"/>
         <xsl:param name="description"/>
@@ -262,7 +262,7 @@
             <td><xsl:value-of select="$select"/></td>
         </tr>
     </xsl:template>
-    
+
     <!-- List all tracks
       -->
     <xsl:template name="list-all-tracks">
@@ -281,7 +281,7 @@
                 <xsl:variable name="mlttrackno">
                     <xsl:number format="1"/>
                 </xsl:variable>
-                
+
                 <li>
                     <xsl:call-template name="show-track-info">
                         <xsl:with-param name="track" select="//playlist[@id=$trackid]"/>
@@ -293,10 +293,10 @@
             </xsl:for-each>
         </ul>
     </xsl:template>
-    
-    
+
+
     <!-- Render track properties, such as track type, name, hidden, locked, muted, compositing
-         
+
          * parameter track: the <playlist> node representing the track to be analysed.
          * parameter hide: if 1, then video is hidden for this track. The reason we need
              to pass in hide information separately is that the <playlist> doesn't contain
@@ -308,7 +308,7 @@
         <xsl:param name="hide"/>
         <xsl:param name="no"/>
         <xsl:param name="trackno"/>
-        
+
         <!-- The track name and icon, but watch the builtin nameless black track! -->
         <xsl:choose>
             <xsl:when test="$track/property[@name='kdenlive:track_name']">
@@ -331,7 +331,7 @@
             </xsl:otherwise>
         </xsl:choose>
         &#160;
-        
+
         <!-- Locked? -->
         <xsl:choose>
             <xsl:when test="$track/property[@name='kdenlive:locked_track']=1">
@@ -357,7 +357,7 @@
                 </xsl:choose>
             </xsl:otherwise>
         </xsl:choose>
-        
+
         <!-- Muted? -->
         <xsl:choose>
             <xsl:when test="$hide='audio' or $hide='both'">
@@ -367,7 +367,7 @@
                 <i class="fa fa-volume-up anno-audible" aria-hidden="true" title="audible"/>&#160;
             </xsl:otherwise>
         </xsl:choose>
-            
+
         <!-- Video track compositing? -->
         <xsl:choose>
             <xsl:when test="$track/property[@name='kdenlive:audio_track']">
@@ -384,11 +384,11 @@
                 </xsl:choose>
             </xsl:otherwise>
         </xsl:choose>
-        
+
         <!-- internal information -->
         <span class="anno-id"> (<i>track id: <xsl:value-of select="$track/@id"/>, MLT track index: <xsl:value-of select="$trackno"/></i>)</span>
     </xsl:template>
-        
+
     <!-- One out of several purposes of the "main bin" playlist is to
          describe Kdenlive's bin folder structure of this project. The
          folders are <property> elements, with names starting with
@@ -414,20 +414,20 @@
         <ul class="project-bin-contents">
             <xsl:if test="count($folders)">
                 <xsl:for-each select="$folders">
-                    <!-- Emulate more/less how Kdenlive sorts its project bin folders: 
+                    <!-- Emulate more/less how Kdenlive sorts its project bin folders:
                          alphabetically... -->
                     <xsl:sort select="text()" data-type="text" order="ascending"/>
                     <xsl:variable name="folderid" select="substring-after(@name,$prefix)"/>
                     <li>
                         <i class="fa fa-folder-o" aria-hidden="true" title="bin folder"/>&#160;<b><xsl:value-of select="text()"/></b>
                         <span class="anno-id"> (<i>folder id: <xsl:value-of select="$folderid"/></i>)</span>
-                        
+
                         <!-- List all folders inside this folder, recursing down into
                              subfolders. -->
                         <xsl:call-template name="list-folders-of-folder">
                             <xsl:with-param name="parentfolderid" select="substring-after(@name,$prefix)"/>
                         </xsl:call-template>
-                        
+
                         <!-- List all clips in this folder. -->
                         <ul>
                             <xsl:call-template name="list-clips-in-folder">
@@ -444,7 +444,7 @@
             </xsl:if>
         </ul>
     </xsl:template>
-    
+
     <!-- Generates a list of clips inside a particular project bin folder.
          If a clip has its clipname set, then this is listed. If no clipname
          has been set, then we list the basename+extension of the clip
@@ -473,7 +473,7 @@
             <!-- Emulate to some extent how Kdenlive sorts its project bin elements,
                  especially clips; the name for which to sort is the clip name, if
                  explicitly set. If unset, then the clips basename+ext is used for
-                 sorting. --> 
+                 sorting. -->
             <xsl:sort select="concat(regexp:replace(property[@name='resource'],'.*/','gi',''),property[@name='kdenlive:clipname'])" order="ascending"/>
             <xsl:variable name="clipid" select="@id"/>
             <xsl:if test="not(contains($clipid,'_'))">
@@ -496,13 +496,13 @@
                                     <xsl:value-of select="regexp:replace(property[@name='resource'],'.*/','gi','')"/>
                                 </xsl:otherwise>
                             </xsl:choose>
-                            
+
                             <xsl:if test="property[@name='mlt_service']/text()='color'">
                                 <xsl:variable name="rgb" select="substring(property[@name='resource']/text(),3,6)"/>
                                 <xsl:text> </xsl:text><i class="fa fa-square" style="color: #{$rgb};"/>
                                 (RGB/A: <xsl:value-of select="$rgb"/>/<xsl:value-of select="substring(property[@name='resource']/text(),9,2)"/>)
                             </xsl:if>
-                            
+
                             <span class="anno-id"> (<i>length:
                                 <xsl:call-template name="show-timecode">
                                     <xsl:with-param name="frames" select="@out"/>
@@ -583,11 +583,11 @@
                     <!-- Kdenlive title clip -->
                     <xsl:when test="property[@name='mlt_service']/text()='kdenlivetitle'">
                         <i class="fa fa-font" aria-hidden="true" title="title clip"/>&#160;
-                    </xsl:when>                                
+                    </xsl:when>
                     <!-- MLT color clip -->
                     <xsl:when test="property[@name='mlt_service']/text()='color'">
                         <span style="font-size:50%; letter-spacing: -0.3em;" aria-hidden="true" title="color clip"><i class="fa fa-circle" style="color: #c00;"/><i class="fa fa-circle" style="color: #0c0;"/><i class="fa fa-circle" style="color: #00c;"/></span>&#160;
-                    </xsl:when>       
+                    </xsl:when>
                     <!-- MLT generators -->
                         <!-- t.b.d. -->
                     <!-- everything else, that is, a video clip (or so we think) -->
@@ -596,9 +596,9 @@
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:otherwise>
-        </xsl:choose>        
+        </xsl:choose>
     </xsl:template>
-    
+
     <!-- -->
     <xsl:template name="list-all-clips">
         <xsl:variable name="folders" select="/mlt/playlist[@id='main bin']/property[starts-with(@name,'kdenlive:folder.')]"/>
@@ -649,18 +649,18 @@
             </xsl:for-each>
         </ul>
     </xsl:template>
-    
+
 
     <!-- Matches all internally added transitions according to their a_track
          parameter. This key surely wins us the price for overly descriptive
          naming.
       -->
     <xsl:key name="internal-composite-transition-by-a-track" match="transition[(property[@name='internal_added']/text()='237') and (not(property[@name='mlt_service']/text()='mix'))]" use="property[@name='a_track']"/>
-    
+
     <!-- -->
     <xsl:template name="video-compositing">
         <h3><i class="fa fa-film" aria-hidden="true"/><i class="fa fa-film" aria-hidden="true"/> Video Compositing</h3>
-        
+
         <p>For automatic video track compositing, Kdenlives creates the following compositing transitions automatically behind the scenes.</p>
 
         <!-- Get all internally added transitions which are NOT audio mixers. This
@@ -758,20 +758,20 @@
         </xsl:choose>
     </xsl:template>
 
-    
-    
-    
+
+
+
     <!-- Kdenlive's audio mixing happens in the background by adding the required
          MLT mix transitions.
       -->
     <xsl:template name="audio-mixing">
         <h3><i class="fa fa-volume-up" aria-hidden="true"/><i class="fa fa-volume-up fa-flip-horizontal" aria-hidden="true"/> Audio Mixing</h3>
-        
+
         <p>For automatic audio mixing, Kdenlive creates the following mix transitions automatically behind the scenes. These mix transitions get updated by Kdenlive only when adding or removing tracks. They don't get automatically refreshed when loading a project (at least not at this time), so be careful in case they got out of sync.</p>
-        
+
         <xsl:variable name="mixtransitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][property[@name='mlt_service']/text()='mix']"/>
         <xsl:variable name="trackscount" select="count(/mlt/tractor[@id='maintractor']/track)-1"/>
-        
+
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
         <xsl:if test="$trackscount &lt; count($mixtransitions)">
             <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>found <i>more</i> internally added audio mix transitions (<xsl:value-of select="count($mixtransitions)"/>) than actual tracks (<xsl:value-of select="$trackscount"/>) in project &#8211; this project may need some
@@ -783,21 +783,21 @@
         <xsl:if test="$trackscount &gt; count($mixtransitions)">
             <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>not enough internally-added audio mix transitions found; there are more tracks (<xsl:value-of select="$trackscount"/>) than audio mixers (<xsl:value-of select="count($mixtransitions)"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
         </xsl:if>
-        
+
         <p>
             <xsl:if test="not($trackscount=count($mixtransitions))">
                 <span class="warning"><i class="fa fa-warning"/> Warning: </span>
             </xsl:if>
             <xsl:value-of select="count($mixtransitions)"/> internally added mix transitions (for <xsl:value-of select="$trackscount"/>+1 tracks):
         </p>
-        
+
         <ul class="tracks">
             <!-- Iterate over all internally added(!) mix(!) transitions. Now this
                  is XPath galore...!
               -->
             <xsl:for-each select="$mixtransitions">
                 <xsl:sort select="property[@name='b_track']/text()" data-type="number" order="descending"/>
-                
+
                 <!-- MLT transitions work on MLT track indices, which are 0-based,
                      bottom to top track. In order to later get the proper track
                      title we start with the B track MLT index for starters.
@@ -826,6 +826,6 @@
         </ul>
     </xsl:template>
 
-    
-    
+
+
 </xsl:stylesheet>
