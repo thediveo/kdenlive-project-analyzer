@@ -52,7 +52,7 @@
 
                 <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css"/>
 
-                <style type="text/css">
+                <style type="text/css"><![CDATA[[
                     body {
                         font-family: Arial, sans-serif;
                     }
@@ -126,7 +126,7 @@
                         color: #900;
                     }
 
-                </style>
+                ]]></style>
             </head>
             <body>
                 <h1><img src="64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
@@ -178,7 +178,7 @@
         <xsl:call-template name="audio-mixing"/>
 
         <h2><i class="fa fa-th" aria-hidden="true"/> Master Clip List</h2>
-        <p>All project bin clips, flat, sorted by their names.</p>
+        <p>All master clips from Kdenlive's project bin, flat, sorted by their names. In addition, derived producers are shown were created in the project.</p>
         <xsl:call-template name="list-all-clips"/>
     </xsl:template>
 
