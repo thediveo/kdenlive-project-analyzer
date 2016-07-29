@@ -32,7 +32,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.8.8'"/>
+    <xsl:variable name="version" select="'0.8.9'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -132,6 +132,16 @@
                         border-bottom: 1px dotted;
                         padding: 2px 0.4em;
                     }
+
+                    table.borderless {
+                        border-width: 0;
+                    }
+
+                    table.borderless td {
+                        padding-left: 0.5em;
+                        padding-right: 0.5em;
+                        padding-top: 0.3ex;
+                    }
                 ]]></style>
             </head>
             <body>
@@ -179,7 +189,7 @@
 
         <h2><i class="fa fa-sitemap" aria-hidden="true"/> Project Bin Contents</h2>
 
-        <p>All project bin clips, as organized into folders. Folders are purely a Kdenlive construct, whereas MLT doesn't know about and also doesn't need folders.</p>
+        <p>All project bin clips, as organized into <xsl:value-of select="$bin-num-folders"/> bin folders. These bin folders are purely a Kdenlive construct, whereas MLT doesn't know about and also doesn't need folders.</p>
         <xsl:call-template name="list-folders-of-folder">
             <xsl:with-param name="parentfolderid" select="-1"/>
         </xsl:call-template>
@@ -212,7 +222,7 @@
         <xsl:variable name="docversion" select="$project/property[@name='kdenlive:docproperties.version']"/>
         <xsl:choose>
             <xsl:when test="$docversion">
-                <table style="border-width:0;">
+                <table class="borderless">
                     <tbody>
                         <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Kdenlive project ID:</xsl:with-param>
@@ -232,7 +242,10 @@
                         </xsl:call-template>
                         <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Project folder:</xsl:with-param>
-                            <xsl:with-param name="copy" select="concat(/mlt/@root,'/',$project/property[@name='kdenlive:docproperties.projectfolder'])"/>
+                            <xsl:with-param name="copy">
+                                <span class="anno"><xsl:value-of select="/mlt/@root"/>/</span>
+                                <xsl:value-of select="$project/property[@name='kdenlive:docproperties.projectfolder']"/>
+                            </xsl:with-param>
                         </xsl:call-template>
                         <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Root folder:</xsl:with-param>
@@ -277,11 +290,11 @@
     <!-- Display statistics about this Kdenlive project.
       -->
     <xsl:template name="show-kdenlive-project-statistics">
-        <table style="border-width:0;">
+        <table class="borderless">
             <tbody>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of timeline tracks:</xsl:with-param>
-                    <xsl:with-param name="copy"><xsl:value-of select="$num-timeline-tracks -1"/> <span class="anno"> (<i>+1 hidden built-in Black track</i>)</span></xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:value-of select="$num-timeline-tracks - 1"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin clips:</xsl:with-param>
@@ -309,7 +322,7 @@
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description-copy">&#8230; colo<span style="opacity: 0.5;">u</span>r clips:</xsl:with-param>
-                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-color-clips"/> &#215; <xsl:call-template name="color-clip-icon"/></xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-color-clips - 1"/> &#215; <xsl:call-template name="color-clip-icon"/> <span class="anno"> (<i>+1 hidden built-in "Black" color clip</i>)</span></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin folders:</xsl:with-param>
@@ -466,13 +479,13 @@
 
     <!-- image clip icon -->
     <xsl:template name="image-clip-icon">
-        <i class="fa fa-picture-o" title="audio clip"/>
+        <i class="fa fa-picture-o" title="image clip"/>
     </xsl:template>
 
 
     <!-- image sequence clip icon -->
     <xsl:template name="image-sequence-clip-icon">
-        <span>
+        <span title="image sequence clip">
             <i class="fa fa-picture-o" title="image sequence clip"/>&#8201;<i class="fa fa-picture-o"/>&#8201;&#8226;&#8226;&#8226;
         </span>
     </xsl:template>
@@ -503,23 +516,43 @@
 
     <!-- generic video track icon -->
     <xsl:template name="video-track-icon">
-        <i class="fa fa-film in-track"/>
+        <xsl:param name="title" select="'video track'"/>
+        <i class="fa fa-film in-track" title="{$title}"/>
     </xsl:template>
 
 
     <!-- generic audio track icon -->
     <xsl:template name="audio-track-icon">
-        <i class="fa fa-volume-up in-track"/>
+        <xsl:param name="title" select="'audio track'"/>
+        <i class="fa fa-volume-up in-track" title="{$title}"/>
     </xsl:template>
 
 
-    <!-- List all tracks
+    <!-- -->
+    <xsl:template name="error-icon">
+        <i class="fa fa-exclamation-triangle error"/>&#160;
+    </xsl:template>
+
+
+    <xsl:template name="warning-icon">
+        <i class="fa fa-exclamation-triangle warning"/>&#160;
+    </xsl:template>
+
+
+    <!-- List all the (timeline) tracks that are defined in this Kdenlive project.
+         We list/show the tracks in the usual Kdenlive timeline layout, that is,
+         from the topmost track down to the bottommost track, in this order. On
+         purpose, we list *all* tracks, including the built-in and hidden "Black"
+         track that Kdenlive automatically includes with each project.
       -->
     <xsl:template name="list-all-tracks">
         <!-- Kdenlive's tracks are referenced as <tracks> elements inside the
              main <tractor> with id "maintractor". However, the Kdenlive
              tracks themselves are then represented as <playlists>. -->
-        <p><xsl:value-of select="$num-timeline-user-tracks"/>(+1) timeline tracks:</p>
+        <xsl:if test="count(/mlt/playlist[@id='black_track']) != 1">
+            <xsl:call-template name="error-icon"/>The hidden built-in internal "Black" track is missing.
+        </xsl:if>
+        <p><xsl:value-of select="$num-timeline-user-tracks"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span> timeline tracks:</p>
         <ul class="tracks">
             <xsl:for-each select="$timeline-tracks">
                 <!-- reverse the order of track elements, thus being now in
@@ -537,7 +570,7 @@
                         <xsl:with-param name="track" select="//playlist[@id=$trackid]"/>
                         <xsl:with-param name="hide" select="@hide"/>
                         <xsl:with-param name="no" select="position()"/>
-                        <xsl:with-param name="trackno" select="$mlttrackno -1"/>
+                        <xsl:with-param name="trackno" select="$mlttrackno - 1"/>
                     </xsl:call-template>
                 </li>
             </xsl:for-each>
@@ -561,21 +594,23 @@
 
         <!-- The track name and icon, but watch the builtin nameless black track! -->
         <xsl:choose>
+            <!-- a user named track -->
             <xsl:when test="$track/property[@name='kdenlive:track_name']">
                 <!-- Track type icon: video or audio; this information is found inside the
                      <playlist> track element.
                   -->
                 <xsl:choose>
                     <xsl:when test="$track/property[@name='kdenlive:audio_track']">
-                        <i class="fa fa-volume-up" aria-hidden="true" title="audio track #{$no}"/>&#160;
+                        <xsl:call-template name="audio-track-icon"><xsl:with-param name="title" select="concat('audio track no. ', $trackno)"/></xsl:call-template>&#160;
                     </xsl:when>
                     <xsl:otherwise>
-                        <i class="fa fa-film" aria-hidden="true" title="video track #{$no}"/>&#160;
+                        <xsl:call-template name="video-track-icon"><xsl:with-param name="title" select="concat('video track no. ', $trackno)"/></xsl:call-template>&#160;
                     </xsl:otherwise>
                 </xsl:choose>
                 <!-- The user-visible track name -->
                 <b><xsl:value-of select="$track/property[@name='kdenlive:track_name']"/></b>
             </xsl:when>
+            <!-- an unnamed (internal) track -->
             <xsl:otherwise>
                 <span class="anno" aria-hidden="true" title="builtin black track"><i class="fa fa-eye-slash"/>&#160;<i>hidden built-in</i>&#160;<b>black</b> track</span>
             </xsl:otherwise>
