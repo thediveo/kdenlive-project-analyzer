@@ -59,14 +59,14 @@
 
                     h2 {
                         margin-top: 2.5ex;
-                        padding-bottom: 0.2ex;
+                        padding-bottom: 0.35ex;
                         border-bottom: solid #aaa 0.2ex;
                     }
 
                     h3 {
                         max-width: 15em;
                         margin-top: 3ex;
-                        padding-bottom: 0.2ex;
+                        padding-bottom: 0.35ex;
                         border-bottom: solid #aaa 0.1ex;
                     }
 
@@ -903,7 +903,7 @@
 
     <!-- -->
     <xsl:template name="video-compositing">
-        <h3><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-film" aria-hidden="true"/> Video Compositing</h3>
+        <h3><span class="in-track"><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-film" aria-hidden="true"/></span> Video Compositing</h3>
 
         <p>For automatic video track compositing, Kdenlives creates the following compositing transitions automatically behind the scenes.</p>
 
@@ -1009,7 +1009,7 @@
          MLT mix transitions.
       -->
     <xsl:template name="audio-mixing">
-        <h3><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-volume-up" aria-hidden="true"/> Audio Mixing</h3>
+        <h3><span class="in-track"><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-volume-up" aria-hidden="true"/></span> Audio Mixing</h3>
 
         <p>For automatic audio mixing, Kdenlive creates the following mix transitions automatically behind the scenes. These mix transitions get updated by Kdenlive only when adding or removing tracks. They don't get automatically refreshed when loading a project (at least not at this time), so be careful in case they got out of sync.</p>
 
