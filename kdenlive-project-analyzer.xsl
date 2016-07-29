@@ -288,28 +288,28 @@
                     <xsl:with-param name="copy"><xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-files-o" title="bin clip"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">... audio-only clips:</xsl:with-param>
-                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-audio-clips"/> &#215; <xsl:call-template name="audio-clip-icon"/></xsl:with-param>
+                    <xsl:with-param name="description">&#8230; audio-only clips:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-audio-clips"/> &#215; <xsl:call-template name="audio-clip-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">... (audio+) video clips:</xsl:with-param>
-                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-audiovideo-clips"/> &#215; <xsl:call-template name="av-clip-icon"/></xsl:with-param>
+                    <xsl:with-param name="description">&#8230; (audio+) video clips:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-audiovideo-clips"/> &#215; <xsl:call-template name="av-clip-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">... image clips:</xsl:with-param>
-                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-image-clips"/> &#215; <xsl:call-template name="image-clip-icon"/></xsl:with-param>
+                    <xsl:with-param name="description">&#8230; image clips:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-image-clips"/> &#215; <xsl:call-template name="image-clip-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">... image squence clips:</xsl:with-param>
-                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-imageseq-clips"/> &#215; <xsl:call-template name="image-sequence-clip-icon"/></xsl:with-param>
+                    <xsl:with-param name="description">&#8230; image squence clips:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-imageseq-clips"/> &#215; <xsl:call-template name="image-sequence-clip-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">... title clips:</xsl:with-param>
-                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-title-clips"/> &#215; <xsl:call-template name="title-clip-icon"/></xsl:with-param>
+                    <xsl:with-param name="description">&#8230; title clips:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-title-clips"/> &#215; <xsl:call-template name="title-clip-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">... color clips:</xsl:with-param>
-                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-color-clips"/> &#215; <xsl:call-template name="color-clip-icon"/></xsl:with-param>
+                    <xsl:with-param name="description-copy">&#8230; colo<span style="opacity: 0.5;">u</span>r clips:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-color-clips"/> &#215; <xsl:call-template name="color-clip-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin folders:</xsl:with-param>
@@ -324,12 +324,12 @@
                     <xsl:with-param name="copy"><xsl:value-of select="$num-internally-added-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">... audio mixers:</xsl:with-param>
-                    <xsl:with-param name="copy">... <xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
+                    <xsl:with-param name="description">&#8230; audio mixers:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">... video compositors:</xsl:with-param>
-                    <xsl:with-param name="copy">... <xsl:value-of select="$num-internally-added-compositing-transitions"/> &#215; <xsl:call-template name="video-track-icon"/></xsl:with-param>
+                    <xsl:with-param name="description">&#8230; video compositors:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-internally-added-compositing-transitions"/> &#215; <xsl:call-template name="video-track-icon"/></xsl:with-param>
                 </xsl:call-template>
            </tbody>
         </table>
@@ -347,10 +347,16 @@
       -->
     <xsl:template name="show-description-with-value">
         <xsl:param name="description"/>
+        <xsl:param name="description-copy"/>
         <xsl:param name="text"/>
         <xsl:param name="copy"/>
         <tr>
-            <td><xsl:value-of select="$description"/></td>
+            <td>
+                <xsl:choose>
+                    <xsl:when test="$description"><xsl:value-of select="$description"/></xsl:when>
+                    <xsl:otherwise><xsl:copy-of select="$description-copy"/></xsl:otherwise>
+                </xsl:choose>
+                </td>
             <td>
                 <xsl:choose>
                     <xsl:when test="$text"><xsl:value-of select="$text"/></xsl:when>
@@ -415,7 +421,7 @@
 
     <!-- All master color clips -->
     <xsl:variable name="bin-master-color-clips"
-                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='mlt_service']/text()='color']"/>
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][(property[@name='mlt_service']/text()='color') or (property[@name='mlt_service']/text()='colour')]"/>
     <xsl:variable name="num-bin-master-color-clips" select="count($bin-master-color-clips)"/>
 
 
