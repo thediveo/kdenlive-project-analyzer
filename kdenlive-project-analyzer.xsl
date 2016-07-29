@@ -280,12 +280,13 @@
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin clips:</xsl:with-param>
                     <xsl:with-param name="copy">
-                        <xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-film"/>
+                        <xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-film" title="bin clip"/>
                         <span class="anno"> (<i>
-                            <xsl:value-of select="$num-bin-master-audio-clips"/> &#215; <i class="fa fa-volume-up"/>,
-                            <xsl:value-of select="$num-bin-master-image-clips"/> &#215; <i class="fa fa-picture-o"/>,
-                            <xsl:value-of select="$num-bin-master-imageseq-clips"/> &#215; <i class="fa fa-picture-o"/><i class="fa fa-picture-o"/>,
-                            <xsl:value-of select="$num-bin-master-title-clips"/> &#215; <i class="fa fa-font"/>,
+                            <xsl:value-of select="$num-bin-master-audio-clips"/> &#215; <i class="fa fa-volume-up" title="audio clip"/>,
+                            <xsl:value-of select="$num-bin-master-audiovideo-clips"/> &#215; <i class="fa fa-film" title="audio+video clip"/>,
+                            <xsl:value-of select="$num-bin-master-image-clips"/> &#215; <i class="fa fa-picture-o" title="image clip"/>,
+                            <xsl:value-of select="$num-bin-master-imageseq-clips"/> &#215; <i class="fa fa-picture-o"/><i class="fa fa-picture-o" title="image sequence clip"/>,
+                            <xsl:value-of select="$num-bin-master-title-clips"/> &#215; <i class="fa fa-font" title="title clip"/>,
                             <xsl:value-of select="$num-bin-master-color-clips"/> &#215; <xsl:call-template name="color-clip-icon"/>
                             </i>)
                         </span>
@@ -354,22 +355,31 @@
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))]"/>
     <xsl:variable name="bin-num-master-clips" select="count($bin-master-clips)"/>
 
-    <!-- All master audio-only clips -->
+    <!-- All master audio-only clips: these can be detected as they don't have
+         a video stream, thus the video stream index is -1.
+      -->
     <xsl:variable name="bin-master-audio-clips"
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='video_index']/text()='-1']"/>
     <xsl:variable name="num-bin-master-audio-clips" select="count($bin-master-audio-clips)"/>
 
-    <!-- All master image clips --> <!-- TODO: qimage -->
+    <!-- All master (audio+) video clips -->
+    <xsl:variable name="bin-master-audiovideo-clips"
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='video_index']/text()!='-1']"/>
+    <xsl:variable name="num-bin-master-audiovideo-clips" select="count($bin-master-audiovideo-clips)"/>
+
+    <!-- All master image clips: this gets complex, as we both have 'pixbuf' and
+         'qimage' as image-producing services. In addition, we don't want to count
+         here any image sequences, so we filter out any special wild-card resource
+         names containing '.all.'.
+      -->
     <xsl:variable name="bin-master-image-clips"
-                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='mlt_service']/text()='pixbuf']"/>
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][(property[@name='mlt_service']/text()='pixbuf' or property[@name='mlt_service']/text()='qimage') and not(contains(property[@name='resource']/text(), '.all.'))]"/>
     <xsl:variable name="num-bin-master-image-clips" select="count($bin-master-image-clips)"/>
 
-    <!-- All master image sequence clips -->
+    <!-- All master image sequence(!) clips -->
     <xsl:variable name="bin-master-imageseq-clips"
-                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][(property[@name='mlt_service']/text()='pixbuf') and (starts-with(regexp:replace(property[@name='resource']/text(),'.*/','gi',''),'.all.'))]"/>
-    <!--  and (substring(property[@name='resource']/text(), string-length(property[@name='resource']/text()-4)='.all.') -->
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][(property[@name='mlt_service']/text()='pixbuf') and contains(property[@name='resource']/text(), '.all.')]"/>
     <xsl:variable name="num-bin-master-imageseq-clips" select="count($bin-master-imageseq-clips)"/>
-
 
     <!-- All master color clips -->
     <xsl:variable name="bin-master-color-clips"
