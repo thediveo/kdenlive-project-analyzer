@@ -21,7 +21,8 @@
   -->
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                xmlns:regexp="http://exslt.org/regular-expressions">
+                xmlns:regexp="http://exslt.org/regular-expressions"
+                extension-element-prefixes="regexp">
 
     <!-- Produce HTML5 document on an XSLT processor which does not
          support disable-output-escaping in order to generate the
