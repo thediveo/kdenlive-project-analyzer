@@ -279,7 +279,16 @@
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin clips:</xsl:with-param>
-                    <xsl:with-param name="copy"><xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-film"/></xsl:with-param>
+                    <xsl:with-param name="copy">
+                        <xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-film"/>
+                        <span class="anno"> (<i>
+                            <xsl:value-of select="$num-bin-master-audio-clips"/> &#215; <i class="fa fa-volume-up"/>,
+                            <xsl:value-of select="$num-bin-master-image-clips"/> &#215; <i class="fa fa-picture-o"/>,
+                            <xsl:value-of select="$num-bin-master-title-clips"/> &#215; <i class="fa fa-font"/>,
+                            <xsl:value-of select="$num-bin-master-color-clips"/> &#215; <xsl:call-template name="color-clip-icon"/>
+                            </i>)
+                        </span>
+                    </xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin folders:</xsl:with-param>
@@ -340,9 +349,29 @@
     <!-- Gather all project bin *master* clips, and some statistics. Master clips
          are those producers with an id that doesn't contain "_" or ":".
       -->
-    <xsl:variable name="bin-master-clips" select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))]"/>
+    <xsl:variable name="bin-master-clips"
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))]"/>
     <xsl:variable name="bin-num-master-clips" select="count($bin-master-clips)"/>
-    <xsl:variable name="bin-num-master-audio-clips" select="0"/>
+
+    <!-- All master audio-only clips -->
+    <xsl:variable name="bin-master-audio-clips"
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='video_index']/text()='-1']"/>
+    <xsl:variable name="num-bin-master-audio-clips" select="count($bin-master-audio-clips)"/>
+
+    <!-- All master image clips --> <!-- TODO: qimage -->
+    <xsl:variable name="bin-master-image-clips"
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='mlt_service']/text()='pixbuf']"/>
+    <xsl:variable name="num-bin-master-image-clips" select="count($bin-master-image-clips)"/>
+
+    <!-- All master color clips -->
+    <xsl:variable name="bin-master-color-clips"
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='mlt_service']/text()='color']"/>
+    <xsl:variable name="num-bin-master-color-clips" select="count($bin-master-color-clips)"/>
+
+    <!-- All master title clips -->
+    <xsl:variable name="bin-master-title-clips"
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='mlt_service']/text()='kdenlivetitle']"/>
+    <xsl:variable name="num-bin-master-title-clips" select="count($bin-master-title-clips)"/>
 
 
     <!-- Gather all user-created transitions -->
@@ -357,6 +386,18 @@
     <xsl:variable name="num-internally-added-mix-transitions" select="count($internally-added-mix-transitions)"/>
     <xsl:variable name="internally-added-compositing-transitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][not(property[@name='mlt_service']/text()='mix')]"/>
     <xsl:variable name="num-internally-added-compositing-transitions" select="count($internally-added-compositing-transitions)"/>
+
+
+    <!-- color clip icon -->
+    <xsl:template name="color-clip-icon">
+        <span style="font-size:50%; letter-spacing: -0.3em;" aria-hidden="true" title="color clip">
+            <i class="fa fa-circle" style="color: #c00;"/>
+            <i class="fa fa-circle" style="color: #0c0;"/>
+            <i class="fa fa-circle" style="color: #00c;"/>
+        </span>
+    </xsl:template>
+
+
 
 
     <!-- List all tracks
