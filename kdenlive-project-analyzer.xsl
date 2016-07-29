@@ -32,7 +32,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.8.9'"/>
+    <xsl:variable name="version" select="'0.8.10'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
