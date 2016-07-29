@@ -20,7 +20,7 @@
     <head>
         <title>Kdenlive Project Disector</title>
     </head>
-    
+
     <body>
         <form>
             <p><input type="file" name="file" id="file" accept=".kdenlive"></input></p>
@@ -35,7 +35,9 @@
             var xmlfr = new FileReader();
             xmlfr.onload = function(evt) {
                 var dp = new DOMParser();
-                var xml = dp.parseFromString(evt.target.result, "application/xml");
+                // ugly hack for broken Kdenlive project XML that isn't valid... :(
+                var kdenlive = evt.target.result.replace(/<mlt\s(.*)>/, "<mlt xmlns:kdenlive=\"http://www.kdenlive.org/namespace/borked\" $1>");
+                var xml = dp.parseFromString(kdenlive, "application/xml");
                 var xsltr = new XMLHttpRequest();
                 xsltr.open("GET", "kdenlive-project-analyzer.xsl", false);
                 xsltr.send(null);
