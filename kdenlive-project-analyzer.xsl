@@ -226,7 +226,7 @@
                         </xsl:call-template>
                         <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Project folder:</xsl:with-param>
-                            <xsl:with-param name="select" select="concat(/mlt/@root,'/',$project/property[@name='kdenlive:docproperties.projectfolder'])"/>
+                            <xsl:with-param name="copy" select="concat(/mlt/@root,'/',$project/property[@name='kdenlive:docproperties.projectfolder'])"/>
                         </xsl:call-template>
                         <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Root folder:</xsl:with-param>
@@ -287,11 +287,11 @@
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of timeline transitions:</xsl:with-param>
-                    <xsl:with-param name="text"></xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:value-of select="$num-user-transitions"/> &#215; <i class="fa fa-clone"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of internally added transitions:</xsl:with-param>
-                    <xsl:with-param name="text"></xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:value-of select="$num-internally-added-transitions"/> &#215; <i class="fa fa-clone"/> <span class="anno"> (<i><xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; audio mixers, <xsl:value-of select="$num-internally-added-compositing-transitions"/> &#215; video compositors</i>)</span></xsl:with-param>
                 </xsl:call-template>
             </tbody>
         </table>
@@ -342,16 +342,22 @@
       -->
     <xsl:variable name="bin-master-clips" select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))]"/>
     <xsl:variable name="bin-num-master-clips" select="count($bin-master-clips)"/>
-    <xsl:variable name="bin-num-master-audio-clips" select=""/>
+    <xsl:variable name="bin-num-master-audio-clips" select="0"/>
+
 
     <!-- Gather all user-created transitions -->
+    <xsl:variable name="user-transitions" select="/mlt/tractor[@id='maintractor']/transition[not(property[@name='internal_added']/text()='237')]"/>
+    <xsl:variable name="num-user-transitions" select="count($user-transitions)"/>
 
 
     <!-- Gather all internally added transitions -->
-    <!--
     <xsl:variable name="internally-added-transitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237']"/>
     <xsl:variable name="num-internally-added-transitions" select="count($internally-added-transitions)"/>
-    -->
+    <xsl:variable name="internally-added-mix-transitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][property[@name='mlt_service']/text()='mix']"/>
+    <xsl:variable name="num-internally-added-mix-transitions" select="count($internally-added-mix-transitions)"/>
+    <xsl:variable name="internally-added-compositing-transitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][not(property[@name='mlt_service']/text()='mix')]"/>
+    <xsl:variable name="num-internally-added-compositing-transitions" select="count($internally-added-compositing-transitions)"/>
+
 
     <!-- List all tracks
       -->
@@ -749,7 +755,7 @@
 
     <!-- -->
     <xsl:template name="video-compositing">
-        <h3><i class="fa fa-film" aria-hidden="true"/><i class="fa fa-film" aria-hidden="true"/> Video Compositing</h3>
+        <h3><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-film" aria-hidden="true"/> Video Compositing</h3>
 
         <p>For automatic video track compositing, Kdenlives creates the following compositing transitions automatically behind the scenes.</p>
 
@@ -855,11 +861,11 @@
          MLT mix transitions.
       -->
     <xsl:template name="audio-mixing">
-        <h3><i class="fa fa-volume-up" aria-hidden="true"/><i class="fa fa-volume-up fa-flip-horizontal" aria-hidden="true"/> Audio Mixing</h3>
+        <h3><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-volume-up" aria-hidden="true"/> Audio Mixing</h3>
 
         <p>For automatic audio mixing, Kdenlive creates the following mix transitions automatically behind the scenes. These mix transitions get updated by Kdenlive only when adding or removing tracks. They don't get automatically refreshed when loading a project (at least not at this time), so be careful in case they got out of sync.</p>
 
-        <xsl:variable name="mixtransitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][property[@name='mlt_service']/text()='mix']"/>
+        <xsl:variable name="mixtransitions" select="$internally-added-mix-transitions"/>
         <xsl:variable name="trackscount" select="count(/mlt/tractor[@id='maintractor']/track)-1"/>
 
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
