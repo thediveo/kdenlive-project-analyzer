@@ -243,7 +243,14 @@
                         <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Project folder:</xsl:with-param>
                             <xsl:with-param name="copy">
-                                <span class="anno"><xsl:value-of select="/mlt/@root"/>/</span>
+                                <xsl:choose>
+                                    <xsl:when test="starts-with($project/property[@name='kdenlive:docproperties.projectfolder']/text(), '/')">
+                                        <xsl:call-template name="error-icon"/> Absolute project folder path:
+                                    </xsl:when>
+                                    <xsl:otherwise>
+                                        <span class="anno"><xsl:value-of select="/mlt/@root"/>/</span>
+                                    </xsl:otherwise>
+                                </xsl:choose>
                                 <xsl:value-of select="$project/property[@name='kdenlive:docproperties.projectfolder']"/>
                             </xsl:with-param>
                         </xsl:call-template>
@@ -528,14 +535,59 @@
     </xsl:template>
 
 
-    <!-- -->
+    <!-- Show an error icon -->
     <xsl:template name="error-icon">
         <i class="fa fa-exclamation-triangle error"/>&#160;
     </xsl:template>
 
 
+    <!-- Show a warning icon -->
     <xsl:template name="warning-icon">
         <i class="fa fa-exclamation-triangle warning"/>&#160;
+    </xsl:template>
+
+
+    <!-- Heuristics for finding out flavor of transparent tracks are used in
+         a Kdenlive project. Possible values are:
+         * none: no suitable information about compositing found
+         * track: old track-wise controllable compositing
+         * preview: new timeline-wise preview-quality compositing
+         * hq: new timeline-wise high-quality compositing
+      -->
+    <xsl:variable name="timeline-compositing-mode">
+        <xsl:choose>
+            <xsl:when test="$num-internally-added-compositing-transitions &gt; 0">
+                <xsl:variable name="compositor-type" select="$internally-added-compositing-transitions[1]/property[@name='mlt_service']/text()"/>
+                <xsl:choose>
+                    <xsl:when test="$compositor-type = 'qtblend'">hq</xsl:when>
+                    <xsl:when test="$compositor-type = 'composite'">preview</xsl:when>
+                    <xsl:when test="$compositor-type = 'frei0r.cairoblend'">track</xsl:when>
+                    <xsl:otherwise>track</xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise>none</xsl:otherwise>
+        </xsl:choose>
+    </xsl:variable>
+
+
+    <!-- Show a short notice about the (assumed) timeline compositing mode -->
+    <xsl:template name="timeline-compositing-info">
+        <p>The timeline track compositing is
+            <xsl:choose>
+                <xsl:when test="$timeline-compositing-mode = 'none'">
+                    completely <i>off</i>
+                </xsl:when>
+                <xsl:when test="$timeline-compositing-mode = 'track'">
+                    (old) <i>track-wise</i> controllable
+                </xsl:when>
+                <xsl:when test="$timeline-compositing-mode = 'preview'">
+                    <i>preview quality</i>
+                </xsl:when>
+                <xsl:when test="$timeline-compositing-mode = 'hq'">
+                    <i>high quality</i>
+                </xsl:when>
+            </xsl:choose>.<!-- note the dot -->
+        </p>
     </xsl:template>
 
 
@@ -552,6 +604,9 @@
         <xsl:if test="count(/mlt/playlist[@id='black_track']) != 1">
             <xsl:call-template name="error-icon"/>The hidden built-in internal "Black" track is missing.
         </xsl:if>
+
+        <xsl:call-template name="timeline-compositing-info"/>
+
         <p><xsl:value-of select="$num-timeline-user-tracks"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span> timeline tracks:</p>
         <ul class="tracks">
             <xsl:for-each select="$timeline-tracks">
@@ -592,7 +647,9 @@
         <xsl:param name="no"/>
         <xsl:param name="trackno"/>
 
-        <!-- The track name and icon, but watch the builtin nameless black track! -->
+        <!-- The track name and icon, but watch the builtin nameless, but not
+             @id-less "Black" track!
+          -->
         <xsl:choose>
             <!-- a user named track -->
             <xsl:when test="$track/property[@name='kdenlive:track_name']">
@@ -612,7 +669,7 @@
             </xsl:when>
             <!-- an unnamed (internal) track -->
             <xsl:otherwise>
-                <span class="anno" aria-hidden="true" title="builtin black track"><i class="fa fa-eye-slash"/>&#160;<i>hidden built-in</i>&#160;<b>black</b> track</span>
+                <span class="anno" aria-hidden="true" title="builtin &#34;Black&#34; track"><i class="fa fa-eye-slash"/>&#160;<i>hidden built-in "<b>Black</b>" track</i></span>
             </xsl:otherwise>
         </xsl:choose>
         &#160;
@@ -947,6 +1004,8 @@
         <h3><span class="in-track"><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-film" aria-hidden="true"/></span> Video Compositing</h3>
 
         <p>For automatic video track compositing, Kdenlives creates the following compositing transitions automatically behind the scenes.</p>
+
+        <xsl:call-template name="timeline-compositing-info"/>
 
         <!-- Get all internally added transitions which are NOT audio mixers. This
              helps us with the different kind of compositing transitions currently
