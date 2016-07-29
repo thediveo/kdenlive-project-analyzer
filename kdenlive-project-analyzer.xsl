@@ -284,6 +284,7 @@
                         <span class="anno"> (<i>
                             <xsl:value-of select="$num-bin-master-audio-clips"/> &#215; <i class="fa fa-volume-up"/>,
                             <xsl:value-of select="$num-bin-master-image-clips"/> &#215; <i class="fa fa-picture-o"/>,
+                            <xsl:value-of select="$num-bin-master-imageseq-clips"/> &#215; <i class="fa fa-picture-o"/><i class="fa fa-picture-o"/>,
                             <xsl:value-of select="$num-bin-master-title-clips"/> &#215; <i class="fa fa-font"/>,
                             <xsl:value-of select="$num-bin-master-color-clips"/> &#215; <xsl:call-template name="color-clip-icon"/>
                             </i>)
@@ -362,6 +363,13 @@
     <xsl:variable name="bin-master-image-clips"
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='mlt_service']/text()='pixbuf']"/>
     <xsl:variable name="num-bin-master-image-clips" select="count($bin-master-image-clips)"/>
+
+    <!-- All master image sequence clips -->
+    <xsl:variable name="bin-master-imageseq-clips"
+                  select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][(property[@name='mlt_service']/text()='pixbuf') and (starts-with(regexp:replace(property[@name='resource']/text(),'.*/','gi',''),'.all.'))]"/>
+    <!--  and (substring(property[@name='resource']/text(), string-length(property[@name='resource']/text()-4)='.all.') -->
+    <xsl:variable name="num-bin-master-imageseq-clips" select="count($bin-master-imageseq-clips)"/>
+
 
     <!-- All master color clips -->
     <xsl:variable name="bin-master-color-clips"
