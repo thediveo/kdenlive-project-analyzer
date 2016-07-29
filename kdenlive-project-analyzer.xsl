@@ -32,7 +32,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.8.7'"/>
+    <xsl:variable name="version" select="'0.8.8'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -126,6 +126,12 @@
                         color: #900;
                     }
 
+                    .in-track {
+                        font-size: 80%;
+                        border-top: 1px dotted;
+                        border-bottom: 1px dotted;
+                        padding: 2px 0.4em;
+                    }
                 ]]></style>
             </head>
             <body>
@@ -275,22 +281,35 @@
             <tbody>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of timeline tracks:</xsl:with-param>
-                    <xsl:with-param name="copy"><xsl:value-of select="$timeline-num-tracks -1"/> <span class="anno"> (<i>+1 hidden built-in Black track</i>)</span></xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:value-of select="$num-timeline-tracks -1"/> <span class="anno"> (<i>+1 hidden built-in Black track</i>)</span></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin clips:</xsl:with-param>
-                    <xsl:with-param name="copy">
-                        <xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-film" title="bin clip"/>
-                        <span class="anno"> (<i>
-                            <xsl:value-of select="$num-bin-master-audio-clips"/> &#215; <i class="fa fa-volume-up" title="audio clip"/>,
-                            <xsl:value-of select="$num-bin-master-audiovideo-clips"/> &#215; <i class="fa fa-film" title="audio+video clip"/>,
-                            <xsl:value-of select="$num-bin-master-image-clips"/> &#215; <i class="fa fa-picture-o" title="image clip"/>,
-                            <xsl:value-of select="$num-bin-master-imageseq-clips"/> &#215; <i class="fa fa-picture-o"/><i class="fa fa-picture-o" title="image sequence clip"/>,
-                            <xsl:value-of select="$num-bin-master-title-clips"/> &#215; <i class="fa fa-font" title="title clip"/>,
-                            <xsl:value-of select="$num-bin-master-color-clips"/> &#215; <xsl:call-template name="color-clip-icon"/>
-                            </i>)
-                        </span>
-                    </xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-files-o" title="bin clip"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">... audio-only clips:</xsl:with-param>
+                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-audio-clips"/> &#215; <xsl:call-template name="audio-clip-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">... (audio+) video clips:</xsl:with-param>
+                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-audiovideo-clips"/> &#215; <xsl:call-template name="av-clip-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">... image clips:</xsl:with-param>
+                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-image-clips"/> &#215; <xsl:call-template name="image-clip-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">... image squence clips:</xsl:with-param>
+                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-imageseq-clips"/> &#215; <xsl:call-template name="image-sequence-clip-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">... title clips:</xsl:with-param>
+                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-title-clips"/> &#215; <xsl:call-template name="title-clip-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">... color clips:</xsl:with-param>
+                    <xsl:with-param name="copy">... <xsl:value-of select="$num-bin-master-color-clips"/> &#215; <xsl:call-template name="color-clip-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin folders:</xsl:with-param>
@@ -298,13 +317,21 @@
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of timeline transitions:</xsl:with-param>
-                    <xsl:with-param name="copy"><xsl:value-of select="$num-user-transitions"/> &#215; <i class="fa fa-clone"/></xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:value-of select="$num-user-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of internally added transitions:</xsl:with-param>
-                    <xsl:with-param name="copy"><xsl:value-of select="$num-internally-added-transitions"/> &#215; <i class="fa fa-clone"/> <span class="anno"> (<i><xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; audio mixers, <xsl:value-of select="$num-internally-added-compositing-transitions"/> &#215; video compositors</i>)</span></xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:value-of select="$num-internally-added-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
                 </xsl:call-template>
-            </tbody>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">... audio mixers:</xsl:with-param>
+                    <xsl:with-param name="copy">... <xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">... video compositors:</xsl:with-param>
+                    <xsl:with-param name="copy">... <xsl:value-of select="$num-internally-added-compositing-transitions"/> &#215; <xsl:call-template name="video-track-icon"/></xsl:with-param>
+                </xsl:call-template>
+           </tbody>
         </table>
     </xsl:template>
 
@@ -339,8 +366,8 @@
          again, with some subtle bugs between different instances...
       -->
     <xsl:variable name="timeline-tracks" select="/mlt/tractor[@id='maintractor']/track"/>
-    <xsl:variable name="timeline-num-tracks" select="count($timeline-tracks)"/>
-    <xsl:variable name="timeline-num-user-tracks" select="$timeline-num-tracks -1"/>
+    <xsl:variable name="num-timeline-tracks" select="count($timeline-tracks)"/>
+    <xsl:variable name="num-timeline-user-tracks" select="$num-timeline-tracks -1"/>
 
 
     <!-- Gather all project bin folders -->
@@ -355,6 +382,7 @@
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))]"/>
     <xsl:variable name="bin-num-master-clips" select="count($bin-master-clips)"/>
 
+
     <!-- All master audio-only clips: these can be detected as they don't have
          a video stream, thus the video stream index is -1.
       -->
@@ -362,10 +390,12 @@
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='video_index']/text()='-1']"/>
     <xsl:variable name="num-bin-master-audio-clips" select="count($bin-master-audio-clips)"/>
 
+
     <!-- All master (audio+) video clips -->
     <xsl:variable name="bin-master-audiovideo-clips"
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='video_index']/text()!='-1']"/>
     <xsl:variable name="num-bin-master-audiovideo-clips" select="count($bin-master-audiovideo-clips)"/>
+
 
     <!-- All master image clips: this gets complex, as we both have 'pixbuf' and
          'qimage' as image-producing services. In addition, we don't want to count
@@ -376,15 +406,18 @@
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][(property[@name='mlt_service']/text()='pixbuf' or property[@name='mlt_service']/text()='qimage') and not(contains(property[@name='resource']/text(), '.all.'))]"/>
     <xsl:variable name="num-bin-master-image-clips" select="count($bin-master-image-clips)"/>
 
+
     <!-- All master image sequence(!) clips -->
     <xsl:variable name="bin-master-imageseq-clips"
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][(property[@name='mlt_service']/text()='pixbuf') and contains(property[@name='resource']/text(), '.all.')]"/>
     <xsl:variable name="num-bin-master-imageseq-clips" select="count($bin-master-imageseq-clips)"/>
 
+
     <!-- All master color clips -->
     <xsl:variable name="bin-master-color-clips"
                   select="/mlt/producer[not(contains(@id, '_')) and not(contains(@id, ':'))][property[@name='mlt_service']/text()='color']"/>
     <xsl:variable name="num-bin-master-color-clips" select="count($bin-master-color-clips)"/>
+
 
     <!-- All master title clips -->
     <xsl:variable name="bin-master-title-clips"
@@ -400,10 +433,49 @@
     <!-- Gather all internally added transitions -->
     <xsl:variable name="internally-added-transitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237']"/>
     <xsl:variable name="num-internally-added-transitions" select="count($internally-added-transitions)"/>
+
+
+    <!-- Gather all internally added audio mix transitions -->
     <xsl:variable name="internally-added-mix-transitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][property[@name='mlt_service']/text()='mix']"/>
     <xsl:variable name="num-internally-added-mix-transitions" select="count($internally-added-mix-transitions)"/>
+
+
+    <!-- Gather all internally added video compositing transitions -->
     <xsl:variable name="internally-added-compositing-transitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][not(property[@name='mlt_service']/text()='mix')]"/>
     <xsl:variable name="num-internally-added-compositing-transitions" select="count($internally-added-compositing-transitions)"/>
+
+
+    <!-- Clip-type specific icons -->
+    <!-- generic or A/V clip icon -->
+    <xsl:template name="av-clip-icon">
+        <i class="fa fa-file-video-o" title="A/V clip"/>
+    </xsl:template>
+
+
+    <!-- audio clip icon -->
+    <xsl:template name="audio-clip-icon">
+        <i class="fa fa-file-audio-o" title="audio clip"/>
+    </xsl:template>
+
+
+    <!-- image clip icon -->
+    <xsl:template name="image-clip-icon">
+        <i class="fa fa-picture-o" title="audio clip"/>
+    </xsl:template>
+
+
+    <!-- image sequence clip icon -->
+    <xsl:template name="image-sequence-clip-icon">
+        <span>
+            <i class="fa fa-picture-o" title="image sequence clip"/>&#8201;<i class="fa fa-picture-o"/>&#8201;&#8226;&#8226;&#8226;
+        </span>
+    </xsl:template>
+
+
+    <!-- title clip icon -->
+    <xsl:template name="title-clip-icon">
+        <i class="fa fa-font" title="audio clip"/>
+    </xsl:template>
 
 
     <!-- color clip icon -->
@@ -416,6 +488,23 @@
     </xsl:template>
 
 
+    <!-- More icon definitions -->
+    <!-- generic transition icon -->
+    <xsl:template name="transition-icon">
+        <i class="fa fa-clone in-track"/>
+    </xsl:template>
+
+
+    <!-- generic video track icon -->
+    <xsl:template name="video-track-icon">
+        <i class="fa fa-film in-track"/>
+    </xsl:template>
+
+
+    <!-- generic audio track icon -->
+    <xsl:template name="audio-track-icon">
+        <i class="fa fa-volume-up in-track"/>
+    </xsl:template>
 
 
     <!-- List all tracks
@@ -424,7 +513,7 @@
         <!-- Kdenlive's tracks are referenced as <tracks> elements inside the
              main <tractor> with id "maintractor". However, the Kdenlive
              tracks themselves are then represented as <playlists>. -->
-        <p><xsl:value-of select="$timeline-num-user-tracks"/>(+1) timeline tracks:</p>
+        <p><xsl:value-of select="$num-timeline-user-tracks"/>(+1) timeline tracks:</p>
         <ul class="tracks">
             <xsl:for-each select="$timeline-tracks">
                 <!-- reverse the order of track elements, thus being now in
@@ -714,7 +803,7 @@
                 <xsl:choose>
                     <!-- audio clip that has no video stream -->
                     <xsl:when test="property[@name='video_index']/text()='-1'">
-                        <i class="fa fa-volume-up" aria-hidden="true" title="audio clip"/>&#160;
+                        <xsl:call-template name="audio-clip-icon"/>&#160;
                     </xsl:when>
                     <!-- an image clip or clip sequence -->
                     <xsl:when test="property[@name='mlt_service']/text()='pixbuf'">
@@ -725,7 +814,7 @@
                           -->
                         <xsl:choose>
                             <xsl:when test="starts-with(regexp:replace(property[@name='resource'],'.*/','gi',''),'.all.')">
-                                <span title="image sequence"><i class="fa fa-picture-o" aria-hidden="true"/>&#8201;<i class="fa fa-ellipsis-h" aria-hidden="true"/>&#8201;<i class="fa fa-picture-o" aria-hidden="true"/></span>&#160;
+                                <xsl:call-template name="image-sequence-clip-icon"/>&#160;
                             </xsl:when>
                             <xsl:otherwise>
                                 <i class="fa fa-picture-o" aria-hidden="true" title="image clip"/>&#160;
@@ -733,21 +822,21 @@
                         </xsl:choose>
                     </xsl:when>
                     <xsl:when test="property[@name='mlt_service']/text()='qimage'">
-                        <i class="fa fa-picture-o" aria-hidden="true" title="image clip"/>&#160;
+                        <xsl:call-template name="image-clip-icon"/>&#160;
                     </xsl:when>
                     <!-- Kdenlive title clip -->
                     <xsl:when test="property[@name='mlt_service']/text()='kdenlivetitle'">
-                        <i class="fa fa-font" aria-hidden="true" title="title clip"/>&#160;
+                        <xsl:call-template name="title-clip-icon"/>&#160;
                     </xsl:when>
                     <!-- MLT color clip -->
                     <xsl:when test="property[@name='mlt_service']/text()='color'">
-                        <span style="font-size:50%; letter-spacing: -0.3em;" aria-hidden="true" title="color clip"><i class="fa fa-circle" style="color: #c00;"/><i class="fa fa-circle" style="color: #0c0;"/><i class="fa fa-circle" style="color: #00c;"/></span>&#160;
+                        <xsl:call-template name="color-clip-icon"/>&#160;
                     </xsl:when>
                     <!-- MLT generators -->
                         <!-- t.b.d. -->
                     <!-- everything else, that is, a video clip (or so we think) -->
                     <xsl:otherwise>
-                        <i class="fa fa-film" aria-hidden="true" title="video clip"/>&#160;
+                        <xsl:call-template name="av-clip-icon"/>&#160;
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:otherwise>
