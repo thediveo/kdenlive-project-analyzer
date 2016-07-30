@@ -143,6 +143,30 @@
                         padding-right: 0.5em;
                         padding-top: 0.3ex;
                     }
+
+                    .track-icon {
+                        display: inline-block;
+                        width: 2em;
+                    }
+
+                    .track-title {
+                        display: inline-block;
+                        text-overflow: ellipsis;
+                        width: 15em;
+                        white-space: nowrap;
+                        overflow: hidden !important;
+                        vertical-align: middle;
+                    }
+
+                    .track-states {
+                        display: inline-block;
+                        width: 7em;
+                    }
+
+                    .fix-fa {
+                        width: 1em;
+                    }
+
                 ]]></style>
             </head>
             <body>
@@ -665,94 +689,102 @@
                 <!-- Track type icon: video or audio; this information is found inside the
                      <playlist> track element.
                   -->
-                <xsl:choose>
-                    <xsl:when test="$track/property[@name='kdenlive:audio_track']">
-                        <xsl:call-template name="audio-track-icon"><xsl:with-param name="title" select="concat('audio track no. ', $mlt-track-idx)"/></xsl:call-template>&#160;
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:call-template name="video-track-icon"><xsl:with-param name="title" select="concat('video track no. ', $mlt-track-idx)"/></xsl:call-template>&#160;
-                    </xsl:otherwise>
-                </xsl:choose>
+                <span class="track-icon">
+                    <xsl:choose>
+                        <xsl:when test="$track/property[@name='kdenlive:audio_track']">
+                            <xsl:call-template name="audio-track-icon"><xsl:with-param name="title" select="concat('audio track no. ', $mlt-track-idx)"/></xsl:call-template>&#160;
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:call-template name="video-track-icon"><xsl:with-param name="title" select="concat('video track no. ', $mlt-track-idx)"/></xsl:call-template>&#160;
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </span>
                 <!-- The user-visible track name -->
-                <b><xsl:value-of select="$track/property[@name='kdenlive:track_name']"/></b>
+                <span class="track-title">
+                    <b><xsl:value-of select="$track/property[@name='kdenlive:track_name']"/></b>
+                </span>
             </xsl:when>
             <!-- an unnamed (internal) track -->
             <xsl:otherwise>
-                <span class="anno" aria-hidden="true" title="builtin &#34;Black&#34; track"><i class="fa fa-eye-slash in-track"/>&#160;<i>hidden built-in "<b>Black</b>" track</i></span>
+                <span class="track-icon anno" aria-hidden="true" title="builtin &#34;Black&#34; track"><i class="fa fa-eye-slash in-track"/></span>
+                <span class="track-title"><i>hidden built-in "<b>Black</b>" track</i></span>
             </xsl:otherwise>
         </xsl:choose>
         &#160;
 
-        <!-- Locked? -->
-        <xsl:choose>
-            <xsl:when test="$track/property[@name='kdenlive:locked_track']=1">
-                <i class="fa fa-lock anno-locked" aria-hidden="true" title="locked"/>&#160;
-            </xsl:when>
-            <xsl:otherwise>
-                <i class="fa fa-unlock anno-unlocked" aria-hidden="true" title="unlocked"/>&#160;
-            </xsl:otherwise>
-        </xsl:choose>
+        <span class="track-states">
+            <!-- Locked? -->
+            <xsl:choose>
+                <xsl:when test="$track/property[@name='kdenlive:locked_track']=1">
+                    <i class="fix-fa fa fa-lock anno-locked" aria-hidden="true" title="locked"/>&#160;
+                </xsl:when>
+                <xsl:otherwise>
+                    <i class="fix-fa fa fa-unlock anno-unlocked" aria-hidden="true" title="unlocked"/>&#160;
+                </xsl:otherwise>
+            </xsl:choose>
 
-        <!-- Hidden video? -->
-        <xsl:choose>
-            <xsl:when test="$track/property[@name='kdenlive:audio_track']">
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:choose>
-                    <xsl:when test="$hide='video' or $hide='both'">
-                        <i class="fa fa-eye-slash anno-hidden" aria-hidden="true" title="hidden"/>&#160;
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <i class="fa fa-eye anno-visible" aria-hidden="true" title="visible"/>&#160;
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:otherwise>
-        </xsl:choose>
+            <!-- Hidden video? -->
+            <xsl:choose>
+                <xsl:when test="$track/property[@name='kdenlive:audio_track']">
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:choose>
+                        <xsl:when test="$hide='video' or $hide='both'">
+                            <i class="fix-fa fa fa-eye-slash anno-hidden" aria-hidden="true" title="hidden"/>&#160;
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <i class="fix-fa fa fa-eye anno-visible" aria-hidden="true" title="visible"/>&#160;
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:otherwise>
+            </xsl:choose>
 
-        <!-- Muted? -->
-        <xsl:choose>
-            <xsl:when test="$hide='audio' or $hide='both'">
-                <span class="anno-muted" aria-hidden="true" title="muted"><i class="fa fa-volume-off"/>&#215;</span>&#160;
-            </xsl:when>
-            <xsl:otherwise>
-                <i class="fa fa-volume-up anno-audible" aria-hidden="true" title="audible"/>&#160;
-            </xsl:otherwise>
-        </xsl:choose>
+            <!-- Muted? -->
+            <xsl:choose>
+                <xsl:when test="$hide='audio' or $hide='both'">
+                    <span class="fix-fa anno-muted" aria-hidden="true" title="muted"><i class="fa fa-volume-off"/>&#215;</span>&#160;
+                </xsl:when>
+                <xsl:otherwise>
+                    <i class="fix-fa fa fa-volume-up anno-audible" aria-hidden="true" title="audible"/>&#160;
+                </xsl:otherwise>
+            </xsl:choose>
 
-        <!-- Video track compositing? -->
-        <xsl:choose>
-            <xsl:when test="$track/property[@name='kdenlive:audio_track']">
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:choose>
-                    <!-- this project seems to use old track-wise compositing -->
-                    <xsl:when test="$timeline-compositing-mode = 'track'">
-                        <!-- automatic composition needs an excplit invitation! -->
-                        <xsl:choose>
-                            <xsl:when test="$track/@id = 'black_track'">
-                                <!-- don't show state icon for built-in track -->
-                            </xsl:when>
-                            <xsl:when test="$track/property[@name='kdenlive:composite']=1">
-                                <xsl:call-template name="transparent-track-icon"/>
-                            </xsl:when>
-                            <xsl:otherwise>
-                                <xsl:call-template name="opaque-track-icon"/>
-                            </xsl:otherwise>
-                        </xsl:choose>
-                    </xsl:when>
-                    <xsl:when test="$timeline-compositing-mode = 'none'">
-                        <!-- none: we show no compositing state/control icon then -->
-                    </xsl:when>
-                    <!-- new timeline-wise track compositing modes -->
-                    <xsl:otherwise>
-                        <xsl:call-template name="transparent-track-icon"/>
-                    </xsl:otherwise>
-                </xsl:choose>
-            </xsl:otherwise>
-        </xsl:choose>
+            <!-- Video track compositing? -->
+            <xsl:choose>
+                <xsl:when test="$track/property[@name='kdenlive:audio_track']">
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:choose>
+                        <!-- this project seems to use old track-wise compositing -->
+                        <xsl:when test="$timeline-compositing-mode = 'track'">
+                            <!-- automatic composition needs an excplit invitation! -->
+                            <xsl:choose>
+                                <xsl:when test="$track/@id = 'black_track'">
+                                    <!-- don't show state icon for built-in track -->
+                                    <span class="fa"/>
+                                </xsl:when>
+                                <xsl:when test="$track/property[@name='kdenlive:composite']=1">
+                                    <span class="fa"><xsl:call-template name="transparent-track-icon"/></span>
+                                </xsl:when>
+                                <xsl:otherwise>
+                                    <span class="fa"><xsl:call-template name="opaque-track-icon"/></span>
+                                </xsl:otherwise>
+                            </xsl:choose>
+                        </xsl:when>
+                        <xsl:when test="$timeline-compositing-mode = 'none'">
+                            <!-- none: we show no compositing state/control icon then -->
+                        </xsl:when>
+                        <!-- new timeline-wise track compositing modes -->
+                        <xsl:otherwise>
+                            <span class="fa"><xsl:call-template name="transparent-track-icon"/></span>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </xsl:otherwise>
+            </xsl:choose>
+        </span>
 
         <!-- internal information -->
-        <span class="anno-id"> (<i>track id: <xsl:value-of select="$track/@id"/>, MLT track index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
+        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track/@id"/>", MLT track index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
     </xsl:template>
 
 
