@@ -632,22 +632,10 @@
         <p><xsl:value-of select="$num-timeline-user-tracks"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span> timeline tracks:</p>
         <ul class="tracks">
             <xsl:for-each select="$timeline-tracks">
-                <!-- reverse the order of track elements, thus being now in
-                     order from bottom to top. This is necessary as MLT priorizes
-                     its tracks in the reverse sequence: the last track is, in
-                     Kdenlive terms, the "topmost" timeline track. -->
-                <xsl:sort select="position()" data-type="number" order="descending"/>
-                <xsl:variable name="trackid" select="@producer"/>
-                <xsl:variable name="mlttrackno">
-                    <xsl:number format="1"/>
-                </xsl:variable>
-
+                <!-- We only need this loop for counting MLT track indices...! -->
                 <li>
                     <xsl:call-template name="show-track-info">
-                        <xsl:with-param name="track" select="//playlist[@id=$trackid]"/>
-                        <xsl:with-param name="hide" select="@hide"/>
-                        <xsl:with-param name="no" select="position()"/>
-                        <xsl:with-param name="trackno" select="$mlttrackno - 1"/>
+                        <xsl:with-param name="mlt-track-idx" select="$num-timeline-tracks - position()"/>
                     </xsl:call-template>
                 </li>
             </xsl:for-each>
@@ -655,21 +643,20 @@
     </xsl:template>
 
 
-    <!-- Render track properties, such as track type, name, hidden, locked, muted, compositing
+    <!-- Render track properties, such as track type, name, hidden, locked, muted,
+         compositing, et cetera.
 
-         * parameter track: the <playlist> node representing the track to be analysed.
-         * parameter hide: if 1, then video is hidden for this track. The reason we need
-             to pass in hide information separately is that the <playlist> doesn't contain
-             this information. Instead, the <track> elements inside the "main bin"
-             <tractor> specify whether video, audio, or both is hidden, if at all.
+         Parameters:
+         * track-idx: the 0-based (MLT) track index
       -->
     <xsl:template name="show-track-info">
-        <xsl:param name="track"/>
-        <xsl:param name="hide"/>
-        <xsl:param name="no"/>
-        <xsl:param name="trackno"/>
+        <xsl:param name="mlt-track-idx"/>
 
-        <!-- The track name and icon, but watch the builtin nameless, but not
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="hide" select="$track-ref/@hide"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+
+        <!-- Show the track name and icon, but watch the builtin nameless, but not
              @id-less "Black" track!
           -->
         <xsl:choose>
@@ -680,10 +667,10 @@
                   -->
                 <xsl:choose>
                     <xsl:when test="$track/property[@name='kdenlive:audio_track']">
-                        <xsl:call-template name="audio-track-icon"><xsl:with-param name="title" select="concat('audio track no. ', $trackno)"/></xsl:call-template>&#160;
+                        <xsl:call-template name="audio-track-icon"><xsl:with-param name="title" select="concat('audio track no. ', $mlt-track-idx)"/></xsl:call-template>&#160;
                     </xsl:when>
                     <xsl:otherwise>
-                        <xsl:call-template name="video-track-icon"><xsl:with-param name="title" select="concat('video track no. ', $trackno)"/></xsl:call-template>&#160;
+                        <xsl:call-template name="video-track-icon"><xsl:with-param name="title" select="concat('video track no. ', $mlt-track-idx)"/></xsl:call-template>&#160;
                     </xsl:otherwise>
                 </xsl:choose>
                 <!-- The user-visible track name -->
@@ -691,7 +678,7 @@
             </xsl:when>
             <!-- an unnamed (internal) track -->
             <xsl:otherwise>
-                <span class="anno" aria-hidden="true" title="builtin &#34;Black&#34; track"><i class="fa fa-eye-slash"/>&#160;<i>hidden built-in "<b>Black</b>" track</i></span>
+                <span class="anno" aria-hidden="true" title="builtin &#34;Black&#34; track"><i class="fa fa-eye-slash in-track"/>&#160;<i>hidden built-in "<b>Black</b>" track</i></span>
             </xsl:otherwise>
         </xsl:choose>
         &#160;
@@ -765,7 +752,7 @@
         </xsl:choose>
 
         <!-- internal information -->
-        <span class="anno-id"> (<i>track id: <xsl:value-of select="$track/@id"/>, MLT track index: <xsl:value-of select="$trackno"/></i>)</span>
+        <span class="anno-id"> (<i>track id: <xsl:value-of select="$track/@id"/>, MLT track index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
     </xsl:template>
 
 
