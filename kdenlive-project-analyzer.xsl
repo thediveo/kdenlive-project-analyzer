@@ -160,7 +160,7 @@
 
                     .track-states {
                         display: inline-block;
-                        width: 7em;
+                        width: 9em;
                     }
 
                     .fix-fa {
@@ -631,10 +631,11 @@
         <i class="fa fa-delicious anno-composite" aria-hidden="true" title="transparent track"/>&#160;
     </xsl:template>
 
+
+    <!-- Show opaque track state icon -->
     <xsl:template name="opaque-track-icon">
         <i class="fa fa-square-o anno-opaque" aria-hidden="true" title="opaque track"/>&#160;
     </xsl:template>
-
 
 
     <!-- List all the (timeline) tracks that are defined in this Kdenlive project.
@@ -813,13 +814,13 @@
                         <xsl:choose>
                             <xsl:when test="$track/@id = 'black_track'">
                                 <!-- don't show state icon for built-in track -->
-                                <span class="fa"/>
+                                <span class="fix-fa"/>
                             </xsl:when>
                             <xsl:when test="$track/property[@name='kdenlive:composite']=1">
-                                <span class="fa"><xsl:call-template name="transparent-track-icon"/></span>
+                                <span class="fix-fa"><xsl:call-template name="transparent-track-icon"/></span>
                             </xsl:when>
                             <xsl:otherwise>
-                                <span class="fa"><xsl:call-template name="opaque-track-icon"/></span>
+                                <span class="fix-fa"><xsl:call-template name="opaque-track-icon"/></span>
                             </xsl:otherwise>
                         </xsl:choose>
                     </xsl:when>
@@ -828,11 +829,29 @@
                     </xsl:when>
                     <!-- new timeline-wise track compositing modes -->
                     <xsl:otherwise>
-                        <span class="fa"><xsl:call-template name="transparent-track-icon"/></span>
+                        <span class="fix-fa"><xsl:call-template name="transparent-track-icon"/></span>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+
+    <!-- -->
+    <xsl:template name="show-track-state-effects">
+        <xsl:param name="mlt-track-idx" select="0"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+
+        <!-- Spacer for now -->
+        <span class="fix-fa"><i class="fa fa-star-o anno"/></span>
+    </xsl:template>
+
+
+    <!-- Spacer for -->
+    <xsl:template name="show-track-state-spacer">
+        <span class="fix-fa"/>
     </xsl:template>
 
 
@@ -871,6 +890,10 @@
             </xsl:call-template>
 
             <xsl:call-template name="show-track-state-transparent">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-effects">
                 <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
             </xsl:call-template>
         </span>
