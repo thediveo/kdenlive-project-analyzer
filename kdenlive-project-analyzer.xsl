@@ -1230,6 +1230,12 @@
 
         <xsl:call-template name="timeline-compositing-info"/>
 
+
+
+
+
+
+
         <!-- Get all internally added transitions which are NOT audio mixers. This
              helps us with the different kind of compositing transitions currently
              used by Kdenlive. In particular:
@@ -1326,26 +1332,23 @@
 
         <p>For automatic audio mixing, Kdenlive creates the following mix transitions automatically behind the scenes. These mix transitions get updated by Kdenlive only when adding or removing tracks. They don't get automatically refreshed when loading a project (at least not at this time), so be careful in case they got out of sync.</p>
 
-        <xsl:variable name="mixtransitions" select="$internally-added-mix-transitions"/>
-        <xsl:variable name="trackscount" select="count(/mlt/tractor[@id='maintractor']/track)-1"/>
-
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
-        <xsl:if test="$trackscount &lt; count($mixtransitions)">
-            <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>found <i>more</i> internally added audio mix transitions (<xsl:value-of select="count($mixtransitions)"/>) than actual tracks (<xsl:value-of select="$trackscount"/>) in project &#8211; this project may need some
-                <xsl:if test="(count($mixtransitions) - $trackscount) &gt; 1">
+        <xsl:if test="$num-timeline-user-tracks &lt; $num-internally-added-mix-transitions">
+            <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>found <i>more</i> internally added audio mix transitions (<xsl:value-of select="$num-internally-added-mix-transitions"/>) than actual tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) in project &#8211; this project may need some
+                <xsl:if test="($num-internally-added-mix-transitions - $num-timeline-user-tracks) &gt; 1">
                     <xsl:text> </xsl:text><b>serious</b>
                 </xsl:if>
                 <xsl:text> </xsl:text>XML cleanup.</p>
         </xsl:if>
-        <xsl:if test="$trackscount &gt; count($mixtransitions)">
-            <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>not enough internally-added audio mix transitions found; there are more tracks (<xsl:value-of select="$trackscount"/>) than audio mixers (<xsl:value-of select="count($mixtransitions)"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
+        <xsl:if test="$num-timeline-user-tracks &gt; $num-internally-added-mix-transitions">
+            <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>not enough internally-added audio mix transitions found; there are more tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) than audio mixers (<xsl:value-of select="$num-internally-added-mix-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
         </xsl:if>
 
         <p>
-            <xsl:if test="not($trackscount=count($mixtransitions))">
+            <xsl:if test="$num-timeline-user-tracks != $num-internally-added-mix-transitions">
                 <span class="warning"><i class="fa fa-warning"/> Warning: </span>
             </xsl:if>
-            <xsl:value-of select="count($mixtransitions)"/> internally added mix transitions (for <xsl:value-of select="$trackscount"/>+1 tracks):
+            <xsl:value-of select="$num-internally-added-mix-transitions"/> internally added mix transitions (for <xsl:value-of select="$num-timeline-user-tracks"/>+1 tracks):
         </p>
 
         <ul class="tracks">
@@ -1365,7 +1368,7 @@
                     <!-- Are there any mix transitions whose B track covers the current
                          track? And how many of them...?
                       -->
-                    <xsl:variable name="track-mixer-transitions" select="$mixtransitions[number(property[@name='b_track']) = $mlt-track-idx]"/>
+                    <xsl:variable name="track-mixer-transitions" select="$internally-added-mix-transitions[number(property[@name='b_track']) = $mlt-track-idx]"/>
                     <xsl:variable name="class">
                         <xsl:choose>
                             <xsl:when test="$mlt-track-idx = 0">anno</xsl:when>
