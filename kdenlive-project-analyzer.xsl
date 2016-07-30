@@ -33,7 +33,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.8.11'"/>
+    <xsl:variable name="version" select="'0.8.12'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -106,8 +106,8 @@
 
                     .error,
                     .warning {
-                        font-weight: bolder;
-                        color: #800;
+                        font-weight: bolder !important;
+                        color: #800 !important;
                     }
 
                     .anno-id, .anno {
@@ -890,7 +890,6 @@
         <xsl:param name="mlt-track-idx"/>
 
         <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
-        <xsl:variable name="hide" select="$track-ref/@hide"/>
         <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
 
         <xsl:call-template name="show-track-icon">
@@ -1350,40 +1349,54 @@
         </p>
 
         <ul class="tracks">
-            <!-- Iterate over all internally added(!) mix(!) transitions. Now this
-                 is XPath galore...!
-              -->
-            <xsl:for-each select="$mixtransitions">
-                <xsl:sort select="property[@name='b_track']/text()" data-type="number" order="descending"/>
+            <xsl:for-each select="$timeline-tracks">
+                <!-- We only need this loop for counting MLT track indices...! -->
+                <xsl:variable name="mlt-track-idx" select="$num-timeline-tracks - position()"/>
 
-                <!-- MLT transitions work on MLT track indices, which are 0-based,
-                     bottom to top track. In order to later get the proper track
-                     title we start with the B track MLT index for starters.
-                  -->
-                <xsl:variable name="trackmltidx" select="number(property[@name='b_track']/text())"/>
-                <!-- Next, get the track id, which is, by the way, something along
-                     the lines of "playlist#". The track id allows us to locate the
-                     <playlist> acting as a track.
-                  -->
-                <xsl:variable name="trackid" select="/mlt/tractor[@id='maintractor']/track[$trackmltidx+1]/@producer"/>
-                <!-- Using the track id we can now look up the title as specified
-                     inside the <playlist> track element, using one of the many
-                     <property> child elements: the one being 'kdenlive:track_name'.
-                  -->
-                <xsl:variable name="tracktitle" select="/mlt/playlist[@id=$trackid]/property[@name='kdenlive:track_name']/text()"/>
                 <li>
-                    <i class="fa fa-clone" aria-hidden="true" title="internally added mixing transition"/>&#160;
-                    <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>&#160;
-                    <b><xsl:value-of select="$tracktitle"/></b>
-                    <span class="anno"> (<i>internal transition id: "<xsl:value-of select="@id"/>", MLT track indices B/A: <xsl:value-of select="$trackmltidx"/>/<xsl:value-of select="number(property[@name='a_track']/text())"/></i>)</span>
+                    <xsl:call-template name="show-track-icon">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                    </xsl:call-template>
+
+                    <xsl:call-template name="show-track-title">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                    </xsl:call-template>
+
+                    <!-- Are there any mix transitions whose B track covers the current
+                         track? And how many of them...?
+                      -->
+                    <xsl:variable name="track-mixer-transitions" select="$mixtransitions[number(property[@name='b_track']) = $mlt-track-idx]"/>
+                    <xsl:variable name="class">
+                        <xsl:choose>
+                            <xsl:when test="$mlt-track-idx = 0">anno</xsl:when>
+                            <xsl:when test="($mlt-track-idx &gt; 0) and (count($track-mixer-transitions) != 1)">error</xsl:when>
+                            <xsl:otherwise></xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:variable>
+
+                    <span class="{$class}">
+                        <xsl:for-each select="$track-mixer-transitions">
+                            <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>&#8201;
+                        </xsl:for-each>
+                    </span>
+                    &#160;
+
+                    <!-- There should be only one... -->
+                    <xsl:if test="count($track-mixer-transitions) &gt; 0">
+                        <span class="{$class} anno"> (<i>
+                            <xsl:for-each select="$track-mixer-transitions">
+                                <xsl:variable name="a-track-idx" select="number(property[@name='a_track'])"/>
+
+                                <xsl:if test="position() &gt; 1">&#160;<i class="fa fa-close" style="font-size: 85%;"/>&#160;</xsl:if>
+
+                                <span title="transition id">"<xsl:value-of select="@id"/>"</span>, <span title="MLT track indices">B/A: <xsl:value-of select="$mlt-track-idx"/>/<xsl:value-of select="$a-track-idx"/></span>
+                            </xsl:for-each>
+                            </i>)</span>
+                    </xsl:if>
                 </li>
             </xsl:for-each>
-            <li>
-                <i class="fa fa-fast-forward fa-rotate-90" aria-hidden="true"/>&#160; onto internal hidden black_track
-            </li>
         </ul>
     </xsl:template>
-
 
 
 </xsl:stylesheet>
