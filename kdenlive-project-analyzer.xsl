@@ -89,7 +89,7 @@
                     }
 
                     ul.tracks li {
-                        border-top: 1px dotted #aaa;
+                        border-top: 0.3ex dotted #aaa;
                         padding-top: .75ex;
                         padding-bottom: .75ex;
                         padding-left: 0.75em;
@@ -97,7 +97,7 @@
                     }
 
                     ul.tracks li:last-child {
-                        border-bottom: 1px dotted #aaa;
+                        border-bottom: 0.3ex dotted #aaa;
                     }
 
                     li {
@@ -129,9 +129,10 @@
 
                     .in-track {
                         font-size: 80%;
-                        border-top: 1px dotted;
-                        border-bottom: 1px dotted;
-                        padding: 2px 0.4em;
+                        border-top: 0.3ex dotted;
+                        border-bottom: 0.3ex dotted;
+                        padding: 0.35ex 0.6em;
+                        background-color: rgba(0,0,0,0.1);
                     }
 
                     table.borderless {
@@ -146,7 +147,7 @@
 
                     .track-icon {
                         display: inline-block;
-                        width: 2em;
+                        width: 2.7em;
                     }
 
                     .track-title {
