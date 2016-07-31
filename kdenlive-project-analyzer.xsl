@@ -104,8 +104,12 @@
                         padding-top: 0.6ex;
                     }
 
-                    .error,
                     .warning {
+                        font-weight: bolder !important;
+                        color: #c80 !important;
+                    }
+
+                    .error {
                         font-weight: bolder !important;
                         color: #800 !important;
                     }
@@ -132,7 +136,7 @@
                         border-top: 0.3ex dotted;
                         border-bottom: 0.3ex dotted;
                         padding: 0.35ex 0.6em;
-                        background-color: rgba(0,0,0,0.1);
+                        background-color: rgba(0,0,0,0.08);
                     }
 
                     table.borderless {
@@ -589,7 +593,7 @@
 
     <!-- Show a warning icon -->
     <xsl:template name="warning-icon">
-        <i class="fa fa-exclamation-triangle warning"/>&#160;
+        <i class="fa fa-exclamation-circle warning"/>&#160;
     </xsl:template>
 
 
@@ -1324,21 +1328,21 @@
 
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
         <xsl:if test="$num-timeline-user-tracks &lt; $num-internally-added-mix-transitions">
-            <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>found <i>more</i> internally added audio mix transitions (<xsl:value-of select="$num-internally-added-mix-transitions"/>) than actual tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) in project &#8211; this project may need some
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>found <i>more</i> internally added audio mix transitions (<xsl:value-of select="$num-internally-added-mix-transitions"/>) than actual tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) in project &#8211; this project may need some
                 <xsl:if test="($num-internally-added-mix-transitions - $num-timeline-user-tracks) &gt; 1">
                     <xsl:text> </xsl:text><b>serious</b>
                 </xsl:if>
                 <xsl:text> </xsl:text>XML cleanup.</p>
         </xsl:if>
         <xsl:if test="$num-timeline-user-tracks &gt; $num-internally-added-mix-transitions">
-            <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>not enough internally-added audio mix transitions found; there are more tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) than audio mixers (<xsl:value-of select="$num-internally-added-mix-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>not enough internally-added audio mix transitions found; there are more tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) than audio mixers (<xsl:value-of select="$num-internally-added-mix-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
         </xsl:if>
 
         <p>
             <xsl:if test="$num-timeline-user-tracks != $num-internally-added-mix-transitions">
-                <span class="warning"><i class="fa fa-warning"/> Warning: </span>
+                <xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>
             </xsl:if>
-            <xsl:value-of select="$num-internally-added-mix-transitions"/> internally added mix transitions (for <xsl:value-of select="$num-timeline-user-tracks"/>+1 tracks):
+            <xsl:value-of select="$num-internally-added-mix-transitions"/> internally added <i>mix</i> transitions (for <xsl:value-of select="$num-timeline-user-tracks"/>+1 tracks):
         </p>
 
         <ul class="tracks">
@@ -1368,29 +1372,31 @@
                     </xsl:variable>
 
                     <span class="{$class}">
-                        <xsl:for-each select="$track-mixer-transitions">
-                            <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>&#8201;
-                        </xsl:for-each>
+                        <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>&#8201;
+                        <xsl:if test="(count($track-mixer-transitions) = 0) and ($mlt-track-idx &gt; 0)">
+                            <xsl:call-template name="error-icon"/>&#160;missing audio mixer
+                        </xsl:if>
                     </span>
                     &#160;
 
-                    <!-- There should be only one... -->
+                    <!-- There really should be only one (mixer) ... per track. -->
                     <xsl:if test="count($track-mixer-transitions) &gt; 0">
                         <span class="{$class} anno">
                             <xsl:for-each select="$track-mixer-transitions">
-                                (<i>
                                 <xsl:variable name="a-track-idx" select="number(property[@name='a_track'])"/>
 
-                                <xsl:if test="position() &gt; 1">&#160;<xsl:call-template name="error-icon"/>&#160;</xsl:if>
-
-                                <span title="transition id">"<xsl:value-of select="@id"/>"</span>, <span title="MLT track indices">B/A: <xsl:value-of select="$mlt-track-idx"/>/<xsl:choose>
-                                    <xsl:when test="$a-track-idx != 0">
-                                        <xsl:call-template name="error-icon"/>&#160;<span class="error"><xsl:value-of select="$a-track-idx"/> instead of 0</span>
-                                    </xsl:when>
-                                    <xsl:otherwise>0</xsl:otherwise>
+                                (<i style="white-space: nowrap;"><!--
+                                --><xsl:if test="position() &gt; 1"><xsl:call-template name="error-icon"/>&#160;needless </xsl:if><!--
+                                --><span title="transition id">"<xsl:value-of select="@id"/>"</span>,
+                                <span title="MLT track indices">B/A:
+                                    <xsl:value-of select="$mlt-track-idx"/>/<!--
+                                    --><xsl:choose>
+                                        <xsl:when test="$a-track-idx != 0">
+                                            <xsl:call-template name="error-icon"/>&#160;<span class="error"><xsl:value-of select="$a-track-idx"/> instead of 0</span>
+                                        </xsl:when>
+                                        <xsl:otherwise>0</xsl:otherwise>
                                     </xsl:choose>
-                                </span>
-                                </i>)
+                                </span></i>)
                             </xsl:for-each>
                             </span>
                     </xsl:if>
