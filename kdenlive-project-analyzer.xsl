@@ -165,7 +165,12 @@
 
                     .track-states {
                         display: inline-block;
-                        width: 10em;
+                        width: 11em;
+                    }
+
+                    .track-length {
+                        display: inline-block;
+                        width: 8em;
                     }
 
                     .fix-fa {
@@ -330,6 +335,11 @@
     <xsl:template name="show-kdenlive-project-statistics">
         <table class="borderless">
             <tbody>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">Timeline total length:</xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:call-template name="show-timeline-length"/></xsl:with-param>
+                </xsl:call-template>
+
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of timeline tracks:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$num-timeline-tracks - 1"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span></xsl:with-param>
@@ -692,6 +702,10 @@
         </ul>
 
         <p>
+            The total timeline length is <xsl:call-template name="show-timeline-length"/>.
+        </p>
+
+        <p>
             The bottommost <i>video</i> track is track
             "<xsl:call-template name="show-track-title">
                 <xsl:with-param name="mlt-track-idx" select="$timeline-lowest-video-track"/>
@@ -884,7 +898,7 @@
         <xsl:param name="mlt-track-idx"/>
 
         <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
-        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref/@producer]"/>
 
         <xsl:choose>
             <xsl:when test="$mlt-track-idx &gt; 0">
@@ -896,6 +910,54 @@
                 <span class="fix-fa">&#160;</span>
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+
+    <!-- Calculate total length of a track in frames -->
+    <xsl:template name="calc-track-length">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
+        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+
+        <xsl:variable name="s" select="sum($track-playlist/blank/@length)"/>
+        <xsl:variable name="i" select="sum($track-playlist/entry/@in)"/>
+        <xsl:variable name="o" select="sum($track-playlist/entry/@out)"/>
+        <xsl:value-of select="$o - $i + $s"/>
+    </xsl:template>
+
+
+    <xsl:template name="max-timeline-length">
+        <xsl:param name="mlt-track-idx" select="1"/>
+
+        <xsl:variable name="len">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:choose>
+            <xsl:when test="$mlt-track-idx &lt; $num-timeline-tracks">
+                <xsl:variable name="maxlen">
+                    <xsl:call-template name="max-timeline-length">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx + 1"/>
+                    </xsl:call-template>
+                </xsl:variable>
+                <xsl:choose>
+                    <xsl:when test="$maxlen > $len"><xsl:value-of select="$maxlen"/></xsl:when>
+                    <xsl:otherwise><xsl:value-of select="$len"/></xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="$len"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
+    <xsl:template name="show-timeline-length">
+        <xsl:call-template name="show-timecode">
+            <xsl:with-param name="frames">
+                <xsl:call-template name="max-timeline-length"/>
+            </xsl:with-param>
+        </xsl:call-template>
     </xsl:template>
 
 
@@ -914,8 +976,8 @@
     <xsl:template name="show-track-info">
         <xsl:param name="mlt-track-idx"/>
 
-        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
-        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
+        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
 
         <xsl:call-template name="show-track-icon">
             <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
@@ -947,8 +1009,19 @@
             </xsl:call-template>
         </span>
 
+        <!-- calculate total track length -->
+        <span class="track-length">
+            <xsl:call-template name="show-timecode">
+                <xsl:with-param name="frames">
+                    <xsl:call-template name="calc-track-length">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                    </xsl:call-template>
+                </xsl:with-param>
+            </xsl:call-template>
+        </span>
+
         <!-- internal information -->
-        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track/@id"/>", MLT track index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
+        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track-ref"/>", MLT track index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
     </xsl:template>
 
 
@@ -1118,7 +1191,8 @@
         <xsl:variable name="mm" select="format-number(floor(($frames div $fps) div 60) mod 60, '00')"/>
         <xsl:variable name="hh" select="format-number(floor(($frames div $fps) div 3600), '00')"/>
 
-        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>:<xsl:value-of select="$ff"/></tt> (<xsl:value-of select="$frames"/>)
+        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>.<xsl:value-of select="$ff"/></tt>
+        <!--(<xsl:value-of select="$frames"/>)-->
     </xsl:template>
 
 
