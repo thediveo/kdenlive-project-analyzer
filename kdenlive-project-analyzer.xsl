@@ -835,6 +835,7 @@
     <!-- -->
     <xsl:template name="show-track-state-transparent">
         <xsl:param name="mlt-track-idx"/>
+        <xsl:param name="class" select="fix-fa"/>
 
         <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
         <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
@@ -843,7 +844,7 @@
         <xsl:choose>
             <xsl:when test="$track/property[@name='kdenlive:audio_track']">
                 <!-- show spacer -->
-                <span class="fix-fa">&#160;</span>
+                <span class="{$class}">&#160;</span>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:choose>
@@ -853,24 +854,24 @@
                         <xsl:choose>
                             <xsl:when test="$track/@id = 'black_track'">
                                 <!-- don't show state icon for built-in track -->
-                                <span class="fix-fa"/>
+                                <span class="{$class}"/>
                             </xsl:when>
                             <xsl:when test="$track/property[@name='kdenlive:composite']=1">
-                                <span class="fix-fa"><xsl:call-template name="transparent-track-icon"/></span>
+                                <span class="{$class}"><xsl:call-template name="transparent-track-icon"/></span>
                             </xsl:when>
                             <xsl:otherwise>
-                                <span class="fix-fa"><xsl:call-template name="opaque-track-icon"/></span>
+                                <span class="{$class}"><xsl:call-template name="opaque-track-icon"/></span>
                             </xsl:otherwise>
                         </xsl:choose>
                     </xsl:when>
                     <xsl:when test="$timeline-compositing-mode = 'none'">
                         <!-- none: we show no compositing state/control icon then -->
                         <!-- show spacer instead -->
-                        <span class="fix-fa">&#160;</span>
+                        <span class="{$class}">&#160;</span>
                     </xsl:when>
                     <!-- new timeline-wise track compositing modes -->
                     <xsl:otherwise>
-                        <span class="fix-fa"><xsl:call-template name="transparent-track-icon"/></span>
+                        <span class="{$class}"><xsl:call-template name="transparent-track-icon"/></span>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:otherwise>
@@ -1310,6 +1311,15 @@
                         </xsl:if>
                     </span>
                     &#160;
+
+                    <xsl:if test="($timeline-compositing-mode = 'track') and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
+                        <span class="{$class}">
+                            <xsl:call-template name="show-track-state-transparent">
+                                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                                <xsl:with-param name="class" select="''"/>
+                            </xsl:call-template>
+                        </span>
+                    </xsl:if>
 
                     <!-- There should be only one... -->
                     <xsl:if test="count($track-comp-transitions) &gt; 0">
