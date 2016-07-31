@@ -1299,25 +1299,29 @@
                     </xsl:variable>
 
                     <span class="{$class}">
-                        <i class="fa fa-film" aria-hidden="true" title="internally added compositing transition"/>
-                         <xsl:if test="(count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
+                        <xsl:if test="$mlt-track-idx &gt; $timeline-lowest-video-track">
+                             <i class="fa fa-film" aria-hidden="true" title="internally added compositing transition"/>
+                        </xsl:if>
+                        <xsl:if test="(count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
                             &#160;<xsl:call-template name="error-icon"/>&#160;missing video compositor
                         </xsl:if>
-                         <xsl:if test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)">
+                        <xsl:if test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)">
                             &#160;<xsl:call-template name="error-icon"/>&#160;unneeded video compositor
                         </xsl:if>
-                   </span>
+                    </span>
                     &#160;
 
                     <!-- There should be only one... -->
                     <xsl:if test="count($track-comp-transitions) &gt; 0">
-                        <span class="{$class} anno"> (<i>
+                        <span class="{$class} anno">
                             <xsl:for-each select="$track-comp-transitions">
                                 <xsl:variable name="a-track-idx" select="number(property[@name='a_track'])"/>
 
-                                <xsl:if test="position() &gt; 1">&#160;<i class="fa fa-close" style="font-size: 85%;"/>&#160;</xsl:if>
+                                (<i style="white-space: nowrap;"><!--
 
-                                <span title="transition id">"<xsl:value-of select="@id"/>"</span>,
+                                --><xsl:if test="position() &gt; 1">needless </xsl:if><!--
+
+                                --><span title="transition id">"<xsl:value-of select="@id"/>"</span>,
 
                                 <span title="MLT track indices">B/A: <xsl:value-of select="$mlt-track-idx"/>/<xsl:if test="$a-track-idx != $timeline-lowest-video-track">
                                         <xsl:call-template name="error-icon"/><span class="error"><xsl:value-of select="$a-track-idx"/></span>
@@ -1326,9 +1330,9 @@
                                     </xsl:if>
                                 </span>,
 
-                                <span title="transition type">type: <xsl:value-of select="property[@name='mlt_service']"/></span>
+                                <span title="transition type">type: <xsl:value-of select="property[@name='mlt_service']"/></span></i>)
                             </xsl:for-each>
-                            </i>)</span>
+                            </span>
                     </xsl:if>
                 </li>
             </xsl:for-each>
@@ -1391,7 +1395,9 @@
                     </xsl:variable>
 
                     <span class="{$class}">
-                        <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>
+                        <xsl:if test="$mlt-track-idx &gt; 0">
+                            <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>
+                        </xsl:if>
                         <xsl:if test="(count($track-mixer-transitions) = 0) and ($mlt-track-idx &gt; 0)">
                             &#160;<xsl:call-template name="error-icon"/>&#160;missing audio mixer
                         </xsl:if>
@@ -1405,7 +1411,9 @@
                                 <xsl:variable name="a-track-idx" select="number(property[@name='a_track'])"/>
 
                                 (<i style="white-space: nowrap;"><!--
+
                                 --><xsl:if test="position() &gt; 1"><xsl:call-template name="error-icon"/>&#160;needless </xsl:if><!--
+
                                 --><span title="transition id">"<xsl:value-of select="@id"/>"</span>,
                                 <span title="MLT track indices">B/A:
                                     <xsl:value-of select="$mlt-track-idx"/>/<!--
