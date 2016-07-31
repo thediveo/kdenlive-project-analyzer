@@ -209,7 +209,7 @@
 
         <h2><i class="fa fa-pie-chart" aria-hidden="true"/> Project Statistics</h2>
 
-        <p>Project statistics derived and calculated from various places in this Kdenlive project.</p>
+        <p>The following project statistics are not stored directly inside Kdenlive project, but instead are derived from various other information elements inside this Kdenlive project.</p>
         <xsl:call-template name="show-kdenlive-project-statistics"/>
 
 
@@ -330,6 +330,15 @@
                     <xsl:with-param name="copy"><xsl:value-of select="$num-timeline-tracks - 1"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">&#8230; audio/video tracks:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-timeline-av-tracks"/> &#215; <xsl:call-template name="video-track-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">&#8230; audio tracks:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-timeline-audio-tracks"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
+                </xsl:call-template>
+
+                <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin clips:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-files-o" title="bin clip"/></xsl:with-param>
                 </xsl:call-template>
@@ -357,14 +366,17 @@
                     <xsl:with-param name="description-copy">&#8230; colo<span style="opacity: 0.5;">u</span>r clips:</xsl:with-param>
                     <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-color-clips - 1"/> &#215; <xsl:call-template name="color-clip-icon"/> <span class="anno"> (<i>+1 hidden built-in "Black" color clip</i>)</span></xsl:with-param>
                 </xsl:call-template>
+
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin folders:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$bin-num-folders"/> &#215; <i class="fa fa-folder-o"/></xsl:with-param>
                 </xsl:call-template>
+
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of timeline transitions:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$num-user-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
                 </xsl:call-template>
+
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of internally added transitions:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$num-internally-added-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
@@ -420,6 +432,13 @@
     <xsl:variable name="timeline-tracks" select="/mlt/tractor[@id='maintractor']/track"/>
     <xsl:variable name="num-timeline-tracks" select="count($timeline-tracks)"/>
     <xsl:variable name="num-timeline-user-tracks" select="$num-timeline-tracks -1"/>
+
+    <!-- Type-specific timeline tracks -->
+    <xsl:variable name="timeline-av-tracks" select="/mlt/playlist[boolean(property[@name='kdenlive:track_name']) and not(property[@name='kdenlive:audio_track'] = '1')]"/>
+    <xsl:variable name="num-timeline-av-tracks" select="count($timeline-av-tracks)"/>
+
+    <xsl:variable name="timeline-audio-tracks" select="/mlt/playlist[boolean(property[@name='kdenlive:track_name']) and (property[@name='kdenlive:audio_track'] = '1')]"/>
+    <xsl:variable name="num-timeline-audio-tracks" select="count($timeline-audio-tracks)"/>
 
 
     <!-- Gather all project bin folders -->
