@@ -33,7 +33,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.8.12'"/>
+    <xsl:variable name="version" select="'0.9.1'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -1254,6 +1254,20 @@
 
         <xsl:call-template name="timeline-compositing-info"/>
 
+
+        <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
+        <xsl:if test="$num-timeline-av-tracks &lt; $num-internally-added-compositing-transitions">
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>found <i>more</i> internally added video compositing transitions (<xsl:value-of select="$num-internally-added-compsiting-transitions"/>) than actual video tracks (<xsl:value-of select="$num-timeline-av-tracks"/>) in project &#8211; this project may need some
+                <xsl:if test="($num-internally-added-mix-transitions - $num-timeline-av-tracks) &gt; 1">
+                    <xsl:text> </xsl:text><b>serious</b>
+                </xsl:if>
+                <xsl:text> </xsl:text>XML cleanup.</p>
+        </xsl:if>
+
+        <xsl:if test="$num-timeline-av-tracks - 1 &gt; $num-internally-added-compositing-transitions">
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>not enough internally-added video compositing transitions found; there are more tracks (<xsl:value-of select="$num-timeline-av-tracks"/>, not counting the lowest video track) than video compositors (<xsl:value-of select="$num-internally-added-compositing-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
+        </xsl:if>
+
         <p>
             <xsl:value-of select="$num-internally-added-compositing-transitions"/> internally added automatic compositing transitions.
         </p>
@@ -1278,17 +1292,21 @@
                     <xsl:variable name="track-comp-transitions" select="$internally-added-compositing-transitions[number(property[@name='b_track']) = $mlt-track-idx]"/>
                     <xsl:variable name="class">
                         <xsl:choose>
-                            <xsl:when test="$mlt-track-idx = 0">anno</xsl:when>
-                            <xsl:when test="($mlt-track-idx &gt; 0) and (count($track-comp-transitions) != 1)">error</xsl:when>
+                            <xsl:when test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) = 0)">anno</xsl:when>
+                            <xsl:when test="(($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)) or (($mlt-track-idx &gt; $timeline-lowest-video-track) and (count($track-comp-transitions) != 1))">error</xsl:when>
                             <xsl:otherwise></xsl:otherwise>
                         </xsl:choose>
                     </xsl:variable>
 
                     <span class="{$class}">
-                        <xsl:for-each select="$track-comp-transitions">
-                            <i class="fa fa-film" aria-hidden="true" title="internally added compositing transition"/>&#8201;
-                        </xsl:for-each>
-                    </span>
+                        <i class="fa fa-film" aria-hidden="true" title="internally added compositing transition"/>
+                         <xsl:if test="(count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
+                            &#160;<xsl:call-template name="error-icon"/>&#160;missing video compositor
+                        </xsl:if>
+                         <xsl:if test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)">
+                            &#160;<xsl:call-template name="error-icon"/>&#160;unneeded video compositor
+                        </xsl:if>
+                   </span>
                     &#160;
 
                     <!-- There should be only one... -->
@@ -1334,6 +1352,7 @@
                 </xsl:if>
                 <xsl:text> </xsl:text>XML cleanup.</p>
         </xsl:if>
+
         <xsl:if test="$num-timeline-user-tracks &gt; $num-internally-added-mix-transitions">
             <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>not enough internally-added audio mix transitions found; there are more tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) than audio mixers (<xsl:value-of select="$num-internally-added-mix-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
         </xsl:if>
@@ -1372,9 +1391,9 @@
                     </xsl:variable>
 
                     <span class="{$class}">
-                        <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>&#8201;
+                        <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>
                         <xsl:if test="(count($track-mixer-transitions) = 0) and ($mlt-track-idx &gt; 0)">
-                            <xsl:call-template name="error-icon"/>&#160;missing audio mixer
+                            &#160;<xsl:call-template name="error-icon"/>&#160;missing audio mixer
                         </xsl:if>
                     </span>
                     &#160;
