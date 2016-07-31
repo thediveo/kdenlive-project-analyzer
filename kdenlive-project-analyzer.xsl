@@ -230,8 +230,8 @@
         <h2><i class="fa fa-eye-slash" aria-hidden="true"/> Internally Added Track Transitions</h2>
 
         <p>Behind the scenes, Kdenlive does some MLT magic in order to achieve both sound mixing and video layer compositing across tracks. Thus, Kdenlive effectively hides some slightly nasty MLT peculiarities: for instance, unless explicitly told so, MLT won't ever mix audio from multiple (audio) tracks. This section may help in diagnosing slightly errartic Kdenlive projects with either odd audio mixing or odd video compositing.</p>
-        <xsl:call-template name="video-compositing"/>
-        <xsl:call-template name="audio-mixing"/>
+        <xsl:call-template name="show-timeline-video-compositing"/>
+        <xsl:call-template name="show-timeline-audio-mixing"/>
 
 
         <h2><i class="fa fa-th" aria-hidden="true"/> Master Clip List</h2>
@@ -1223,7 +1223,7 @@
     <xsl:key name="internal-composite-transition-by-a-track" match="transition[(property[@name='internal_added']/text()='237') and (not(property[@name='mlt_service']/text()='mix'))]" use="property[@name='a_track']"/>
 
     <!-- -->
-    <xsl:template name="video-compositing">
+    <xsl:template name="show-timeline-video-compositing">
         <h3><span class="in-track"><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-film" aria-hidden="true"/></span> Video Compositing</h3>
 
         <p>For automatic video track compositing, Kdenlives creates the following compositing transitions automatically behind the scenes.</p>
@@ -1297,7 +1297,7 @@
     <!-- Kdenlive's audio mixing happens in the background by adding the required
          MLT mix transitions.
       -->
-    <xsl:template name="audio-mixing">
+    <xsl:template name="show-timeline-audio-mixing">
         <h3><span class="in-track"><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-volume-up" aria-hidden="true"/></span> Audio Mixing</h3>
 
         <p>For automatic audio mixing, Kdenlive creates the following mix transitions automatically behind the scenes. These mix transitions get updated by Kdenlive only when adding or removing tracks. They don't get automatically refreshed when loading a project (at least not at this time), so be careful in case they got out of sync.</p>
@@ -1356,18 +1356,23 @@
 
                     <!-- There should be only one... -->
                     <xsl:if test="count($track-mixer-transitions) &gt; 0">
-                        <span class="{$class} anno"> (<i>
+                        <span class="{$class} anno">
                             <xsl:for-each select="$track-mixer-transitions">
+                                (<i>
                                 <xsl:variable name="a-track-idx" select="number(property[@name='a_track'])"/>
 
                                 <xsl:if test="position() &gt; 1">&#160;<xsl:call-template name="error-icon"/>&#160;</xsl:if>
 
-                                <span title="transition id">"<xsl:value-of select="@id"/>"</span>, <span title="MLT track indices">B/A: <xsl:value-of select="$mlt-track-idx"/>/<xsl:if test="$a-track-idx != 0">
-                                    <xsl:call-template name="error-icon"/><span class="error"><xsl:value-of select="$a-track-idx"/></span></xsl:if>
-                                    <xsl:if test="$a-track-idx = 0"><xsl:value-of select="$a-track-idx"/></xsl:if>
+                                <span title="transition id">"<xsl:value-of select="@id"/>"</span>, <span title="MLT track indices">B/A: <xsl:value-of select="$mlt-track-idx"/>/<xsl:choose>
+                                    <xsl:when test="$a-track-idx != 0">
+                                        <xsl:call-template name="error-icon"/>&#160;<span class="error"><xsl:value-of select="$a-track-idx"/> instead of 0</span>
+                                    </xsl:when>
+                                    <xsl:otherwise>0</xsl:otherwise>
+                                    </xsl:choose>
                                 </span>
+                                </i>)
                             </xsl:for-each>
-                            </i>)</span>
+                            </span>
                     </xsl:if>
                 </li>
             </xsl:for-each>
