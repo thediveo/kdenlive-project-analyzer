@@ -33,7 +33,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.8.11'"/>
+    <xsl:variable name="version" select="'0.9.1'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -89,7 +89,7 @@
                     }
 
                     ul.tracks li {
-                        border-top: 1px dotted #aaa;
+                        border-top: 0.3ex dotted #aaa;
                         padding-top: .75ex;
                         padding-bottom: .75ex;
                         padding-left: 0.75em;
@@ -97,17 +97,21 @@
                     }
 
                     ul.tracks li:last-child {
-                        border-bottom: 1px dotted #aaa;
+                        border-bottom: 0.3ex dotted #aaa;
                     }
 
                     li {
                         padding-top: 0.6ex;
                     }
 
-                    .error,
                     .warning {
-                        font-weight: bolder;
-                        color: #800;
+                        font-weight: bolder !important;
+                        color: #c80 !important;
+                    }
+
+                    .error {
+                        font-weight: bolder !important;
+                        color: #800 !important;
                     }
 
                     .anno-id, .anno {
@@ -129,9 +133,10 @@
 
                     .in-track {
                         font-size: 80%;
-                        border-top: 1px dotted;
-                        border-bottom: 1px dotted;
-                        padding: 2px 0.4em;
+                        border-top: 0.3ex dotted;
+                        border-bottom: 0.3ex dotted;
+                        padding: 0.35ex 0.6em;
+                        background-color: rgba(0,0,0,0.08);
                     }
 
                     table.borderless {
@@ -143,6 +148,36 @@
                         padding-right: 0.5em;
                         padding-top: 0.3ex;
                     }
+
+                    .track-icon {
+                        display: inline-block;
+                        width: 2.7em;
+                    }
+
+                    .track-title {
+                        display: inline-block;
+                        text-overflow: ellipsis;
+                        width: 15em;
+                        white-space: nowrap;
+                        overflow: hidden !important;
+                        vertical-align: middle;
+                    }
+
+                    .track-states {
+                        display: inline-block;
+                        width: 11em;
+                    }
+
+                    .track-length {
+                        display: inline-block;
+                        width: 8em;
+                    }
+
+                    .fix-fa {
+                        width: 1.7em;
+                        float: left;
+                    }
+
                 ]]></style>
             </head>
             <body>
@@ -184,7 +219,7 @@
 
         <h2><i class="fa fa-pie-chart" aria-hidden="true"/> Project Statistics</h2>
 
-        <p>Project statistics derived and calculated from various places in this Kdenlive project.</p>
+        <p>The following project statistics are not stored directly inside Kdenlive project, but instead are derived from various other information elements inside this Kdenlive project.</p>
         <xsl:call-template name="show-kdenlive-project-statistics"/>
 
 
@@ -205,8 +240,8 @@
         <h2><i class="fa fa-eye-slash" aria-hidden="true"/> Internally Added Track Transitions</h2>
 
         <p>Behind the scenes, Kdenlive does some MLT magic in order to achieve both sound mixing and video layer compositing across tracks. Thus, Kdenlive effectively hides some slightly nasty MLT peculiarities: for instance, unless explicitly told so, MLT won't ever mix audio from multiple (audio) tracks. This section may help in diagnosing slightly errartic Kdenlive projects with either odd audio mixing or odd video compositing.</p>
-        <xsl:call-template name="video-compositing"/>
-        <xsl:call-template name="audio-mixing"/>
+        <xsl:call-template name="show-timeline-video-compositing"/>
+        <xsl:call-template name="show-timeline-audio-mixing"/>
 
 
         <h2><i class="fa fa-th" aria-hidden="true"/> Master Clip List</h2>
@@ -246,7 +281,7 @@
                             <xsl:with-param name="copy">
                                 <xsl:choose>
                                     <xsl:when test="starts-with($project/property[@name='kdenlive:docproperties.projectfolder']/text(), '/')">
-                                        <xsl:call-template name="error-icon"/> Absolute project folder path:
+                                        <xsl:call-template name="error-icon"/>&#160;Absolute project folder path:
                                     </xsl:when>
                                     <xsl:otherwise>
                                         <span class="anno"><xsl:value-of select="/mlt/@root"/>/</span>
@@ -301,9 +336,23 @@
         <table class="borderless">
             <tbody>
                 <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">Timeline total length:</xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:call-template name="show-timeline-length"/></xsl:with-param>
+                </xsl:call-template>
+
+                <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of timeline tracks:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$num-timeline-tracks - 1"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span></xsl:with-param>
                 </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">&#8230; audio/video tracks:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-timeline-av-tracks"/> &#215; <xsl:call-template name="video-track-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">&#8230; audio tracks:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-timeline-audio-tracks"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
+                </xsl:call-template>
+
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin clips:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-files-o" title="bin clip"/></xsl:with-param>
@@ -332,14 +381,17 @@
                     <xsl:with-param name="description-copy">&#8230; colo<span style="opacity: 0.5;">u</span>r clips:</xsl:with-param>
                     <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-bin-master-color-clips - 1"/> &#215; <xsl:call-template name="color-clip-icon"/> <span class="anno"> (<i>+1 hidden built-in "Black" color clip</i>)</span></xsl:with-param>
                 </xsl:call-template>
+
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin folders:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$bin-num-folders"/> &#215; <i class="fa fa-folder-o"/></xsl:with-param>
                 </xsl:call-template>
+
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of timeline transitions:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$num-user-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
                 </xsl:call-template>
+
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of internally added transitions:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:value-of select="$num-internally-added-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
@@ -395,6 +447,13 @@
     <xsl:variable name="timeline-tracks" select="/mlt/tractor[@id='maintractor']/track"/>
     <xsl:variable name="num-timeline-tracks" select="count($timeline-tracks)"/>
     <xsl:variable name="num-timeline-user-tracks" select="$num-timeline-tracks -1"/>
+
+    <!-- Type-specific timeline tracks -->
+    <xsl:variable name="timeline-av-tracks" select="/mlt/playlist[boolean(property[@name='kdenlive:track_name']) and not(property[@name='kdenlive:audio_track'] = '1')]"/>
+    <xsl:variable name="num-timeline-av-tracks" select="count($timeline-av-tracks)"/>
+
+    <xsl:variable name="timeline-audio-tracks" select="/mlt/playlist[boolean(property[@name='kdenlive:track_name']) and (property[@name='kdenlive:audio_track'] = '1')]"/>
+    <xsl:variable name="num-timeline-audio-tracks" select="count($timeline-audio-tracks)"/>
 
 
     <!-- Gather all project bin folders -->
@@ -538,13 +597,13 @@
 
     <!-- Show an error icon -->
     <xsl:template name="error-icon">
-        <i class="fa fa-exclamation-triangle error"/>&#160;
+        <i class="fa fa-exclamation-triangle error"/>
     </xsl:template>
 
 
     <!-- Show a warning icon -->
     <xsl:template name="warning-icon">
-        <i class="fa fa-exclamation-triangle warning"/>&#160;
+        <i class="fa fa-exclamation-circle warning"/>&#160;
     </xsl:template>
 
 
@@ -607,10 +666,11 @@
         <i class="fa fa-delicious anno-composite" aria-hidden="true" title="transparent track"/>&#160;
     </xsl:template>
 
+
+    <!-- Show opaque track state icon -->
     <xsl:template name="opaque-track-icon">
         <i class="fa fa-square-o anno-opaque" aria-hidden="true" title="opaque track"/>&#160;
     </xsl:template>
-
 
 
     <!-- List all the (timeline) tracks that are defined in this Kdenlive project.
@@ -624,7 +684,7 @@
              main <tractor> with id "maintractor". However, the Kdenlive
              tracks themselves are then represented as <playlists>. -->
         <xsl:if test="count(/mlt/playlist[@id='black_track']) != 1">
-            <xsl:call-template name="error-icon"/>The hidden built-in internal "Black" track is missing.
+            <xsl:call-template name="error-icon"/>&#160;The hidden built-in internal "Black" track is missing.
         </xsl:if>
 
         <xsl:call-template name="timeline-compositing-info"/>
@@ -632,45 +692,40 @@
         <p><xsl:value-of select="$num-timeline-user-tracks"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span> timeline tracks:</p>
         <ul class="tracks">
             <xsl:for-each select="$timeline-tracks">
-                <!-- reverse the order of track elements, thus being now in
-                     order from bottom to top. This is necessary as MLT priorizes
-                     its tracks in the reverse sequence: the last track is, in
-                     Kdenlive terms, the "topmost" timeline track. -->
-                <xsl:sort select="position()" data-type="number" order="descending"/>
-                <xsl:variable name="trackid" select="@producer"/>
-                <xsl:variable name="mlttrackno">
-                    <xsl:number format="1"/>
-                </xsl:variable>
-
+                <!-- We only need this loop for counting MLT track indices...! -->
                 <li>
                     <xsl:call-template name="show-track-info">
-                        <xsl:with-param name="track" select="//playlist[@id=$trackid]"/>
-                        <xsl:with-param name="hide" select="@hide"/>
-                        <xsl:with-param name="no" select="position()"/>
-                        <xsl:with-param name="trackno" select="$mlttrackno - 1"/>
+                        <xsl:with-param name="mlt-track-idx" select="$num-timeline-tracks - position()"/>
                     </xsl:call-template>
                 </li>
             </xsl:for-each>
         </ul>
+
+        <p>
+            The total timeline length is <xsl:call-template name="show-timeline-length"/>.
+        </p>
+
+        <p>
+            The bottommost <i>video</i> track is track
+            "<xsl:call-template name="show-track-title">
+                <xsl:with-param name="mlt-track-idx" select="$timeline-lowest-video-track"/>
+                <xsl:with-param name="class" select="''"/>
+            </xsl:call-template>"
+            <span class="anno">(<i>MLT track index: <xsl:value-of select="$timeline-lowest-video-track"/></i>)</span>
+        </p>
     </xsl:template>
 
 
-    <!-- Render track properties, such as track type, name, hidden, locked, muted, compositing
-
-         * parameter track: the <playlist> node representing the track to be analysed.
-         * parameter hide: if 1, then video is hidden for this track. The reason we need
-             to pass in hide information separately is that the <playlist> doesn't contain
-             this information. Instead, the <track> elements inside the "main bin"
-             <tractor> specify whether video, audio, or both is hidden, if at all.
+    <!-- Show appropriate icon depending on type of track.
       -->
-    <xsl:template name="show-track-info">
-        <xsl:param name="track"/>
-        <xsl:param name="hide"/>
-        <xsl:param name="no"/>
-        <xsl:param name="trackno"/>
+    <xsl:template name="show-track-icon">
+        <xsl:param name="mlt-track-idx"/>
 
-        <!-- The track name and icon, but watch the builtin nameless, but not
-             @id-less "Black" track!
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="hide" select="$track-ref/@hide"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+
+        <!-- Watch the builtin nameless, but not @id-less "Black" track!
           -->
         <xsl:choose>
             <!-- a user named track -->
@@ -678,63 +733,132 @@
                 <!-- Track type icon: video or audio; this information is found inside the
                      <playlist> track element.
                   -->
-                <xsl:choose>
-                    <xsl:when test="$track/property[@name='kdenlive:audio_track']">
-                        <xsl:call-template name="audio-track-icon"><xsl:with-param name="title" select="concat('audio track no. ', $trackno)"/></xsl:call-template>&#160;
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:call-template name="video-track-icon"><xsl:with-param name="title" select="concat('video track no. ', $trackno)"/></xsl:call-template>&#160;
-                    </xsl:otherwise>
-                </xsl:choose>
-                <!-- The user-visible track name -->
-                <b><xsl:value-of select="$track/property[@name='kdenlive:track_name']"/></b>
+                <span class="track-icon">
+                    <xsl:choose>
+                        <xsl:when test="$track/property[@name='kdenlive:audio_track']">
+                            <xsl:call-template name="audio-track-icon"><xsl:with-param name="title" select="concat('audio track no. ', $mlt-track-idx)"/></xsl:call-template>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:call-template name="video-track-icon"><xsl:with-param name="title" select="concat('video track no. ', $mlt-track-idx)"/></xsl:call-template>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </span>
             </xsl:when>
             <!-- an unnamed (internal) track -->
             <xsl:otherwise>
-                <span class="anno" aria-hidden="true" title="builtin &#34;Black&#34; track"><i class="fa fa-eye-slash"/>&#160;<i>hidden built-in "<b>Black</b>" track</i></span>
+                <span class="track-icon anno" aria-hidden="true" title="builtin &#34;Black&#34; track"><i class="fa fa-eye-slash in-track"/></span>
             </xsl:otherwise>
         </xsl:choose>
-        &#160;
+    </xsl:template>
+
+
+    <!-- Show title of a track.
+      -->
+    <xsl:template name="show-track-title">
+        <xsl:param name="mlt-track-idx"/>
+        <xsl:param name="class" select="'track-title'"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+
+        <!-- Watch the builtin nameless, but not @id-less "Black" track!
+          -->
+        <xsl:choose>
+            <!-- a user named track -->
+            <xsl:when test="$track/property[@name='kdenlive:track_name']">
+                <!-- The user-visible track name -->
+                <span class="{$class}">
+                    <b><xsl:value-of select="$track/property[@name='kdenlive:track_name']"/></b>
+                </span>
+            </xsl:when>
+            <!-- an unnamed (internal) track -->
+            <xsl:otherwise>
+                <span class="{$class} anno"><i>hidden built-in "<b>Black</b>" track</i></span>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
+    <!-- -->
+    <xsl:template name="show-track-state-locked">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
 
         <!-- Locked? -->
         <xsl:choose>
             <xsl:when test="$track/property[@name='kdenlive:locked_track']=1">
-                <i class="fa fa-lock anno-locked" aria-hidden="true" title="locked"/>&#160;
+                <i class="fix-fa fa fa-lock anno-locked" aria-hidden="true" title="locked"/>&#160;
             </xsl:when>
             <xsl:otherwise>
-                <i class="fa fa-unlock anno-unlocked" aria-hidden="true" title="unlocked"/>&#160;
+                <i class="fix-fa fa fa-unlock anno-unlocked" aria-hidden="true" title="unlocked"/>&#160;
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+
+    <!-- -->
+    <xsl:template name="show-track-state-hidden">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="hide" select="$track-ref/@hide"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
 
         <!-- Hidden video? -->
         <xsl:choose>
             <xsl:when test="$track/property[@name='kdenlive:audio_track']">
+                <!-- show spacer -->
+                <span class="fix-fa">&#160;</span>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:choose>
                     <xsl:when test="$hide='video' or $hide='both'">
-                        <i class="fa fa-eye-slash anno-hidden" aria-hidden="true" title="hidden"/>&#160;
+                        <i class="fix-fa fa fa-eye-slash anno-hidden" aria-hidden="true" title="hidden"/>&#160;
                     </xsl:when>
                     <xsl:otherwise>
-                        <i class="fa fa-eye anno-visible" aria-hidden="true" title="visible"/>&#160;
+                        <i class="fix-fa fa fa-eye anno-visible" aria-hidden="true" title="visible"/>&#160;
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+
+    <!-- -->
+    <xsl:template name="show-track-state-muted">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="hide" select="$track-ref/@hide"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
 
         <!-- Muted? -->
         <xsl:choose>
             <xsl:when test="$hide='audio' or $hide='both'">
-                <span class="anno-muted" aria-hidden="true" title="muted"><i class="fa fa-volume-off"/>&#215;</span>&#160;
+                <span class="fix-fa anno-muted" aria-hidden="true" title="muted"><i class="fa fa-volume-off"/>&#215;</span>&#160;
             </xsl:when>
             <xsl:otherwise>
-                <i class="fa fa-volume-up anno-audible" aria-hidden="true" title="audible"/>&#160;
+                <i class="fix-fa fa fa-volume-up anno-audible" aria-hidden="true" title="audible"/>&#160;
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
 
-        <!-- Video track compositing? -->
+
+    <!-- -->
+    <xsl:template name="show-track-state-transparent">
+        <xsl:param name="mlt-track-idx"/>
+        <xsl:param name="class" select="fix-fa"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+
+       <!-- Video track compositing? -->
         <xsl:choose>
             <xsl:when test="$track/property[@name='kdenlive:audio_track']">
+                <!-- show spacer -->
+                <span class="{$class}">&#160;</span>
             </xsl:when>
             <xsl:otherwise>
                 <xsl:choose>
@@ -744,29 +868,188 @@
                         <xsl:choose>
                             <xsl:when test="$track/@id = 'black_track'">
                                 <!-- don't show state icon for built-in track -->
+                                <span class="{$class}"/>
                             </xsl:when>
                             <xsl:when test="$track/property[@name='kdenlive:composite']=1">
-                                <xsl:call-template name="transparent-track-icon"/>
+                                <span class="{$class}"><xsl:call-template name="transparent-track-icon"/></span>
                             </xsl:when>
                             <xsl:otherwise>
-                                <xsl:call-template name="opaque-track-icon"/>
+                                <span class="{$class}"><xsl:call-template name="opaque-track-icon"/></span>
                             </xsl:otherwise>
                         </xsl:choose>
                     </xsl:when>
                     <xsl:when test="$timeline-compositing-mode = 'none'">
                         <!-- none: we show no compositing state/control icon then -->
+                        <!-- show spacer instead -->
+                        <span class="{$class}">&#160;</span>
                     </xsl:when>
                     <!-- new timeline-wise track compositing modes -->
                     <xsl:otherwise>
-                        <xsl:call-template name="transparent-track-icon"/>
+                        <span class="{$class}"><xsl:call-template name="transparent-track-icon"/></span>
                     </xsl:otherwise>
                 </xsl:choose>
             </xsl:otherwise>
         </xsl:choose>
+    </xsl:template>
+
+
+    <!-- -->
+    <xsl:template name="show-track-state-effects">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+
+        <xsl:choose>
+            <xsl:when test="$mlt-track-idx &gt; 0">
+                <!-- Placeholder for now -->
+                <span class="fix-fa"><i class="fa fa-star-o anno"/></span>
+            </xsl:when>
+            <xsl:otherwise>
+                <!-- Spacer -->
+                <span class="fix-fa">&#160;</span>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
+    <!-- Calculate total length of a track in frames -->
+    <xsl:template name="calc-track-length">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
+        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+
+        <xsl:variable name="s" select="sum($track-playlist/blank/@length)"/>
+        <xsl:variable name="i" select="sum($track-playlist/entry/@in)"/>
+        <xsl:variable name="o" select="sum($track-playlist/entry/@out)"/>
+        <xsl:value-of select="$o - $i + $s"/>
+    </xsl:template>
+
+
+    <xsl:template name="max-timeline-length">
+        <xsl:param name="mlt-track-idx" select="1"/>
+
+        <xsl:variable name="len">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:choose>
+            <xsl:when test="$mlt-track-idx &lt; $num-timeline-tracks">
+                <xsl:variable name="maxlen">
+                    <xsl:call-template name="max-timeline-length">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx + 1"/>
+                    </xsl:call-template>
+                </xsl:variable>
+                <xsl:choose>
+                    <xsl:when test="$maxlen > $len"><xsl:value-of select="$maxlen"/></xsl:when>
+                    <xsl:otherwise><xsl:value-of select="$len"/></xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="$len"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
+    <xsl:template name="show-timeline-length">
+        <xsl:call-template name="show-timecode">
+            <xsl:with-param name="frames">
+                <xsl:call-template name="max-timeline-length"/>
+            </xsl:with-param>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <!-- Spacer for -->
+    <xsl:template name="show-track-state-spacer">
+        <span class="fix-fa"/>
+    </xsl:template>
+
+
+    <!-- Render track properties, such as track type, name, hidden, locked, muted,
+         compositing, et cetera.
+
+         Parameters:
+         * track-idx: the 0-based (MLT) track index
+      -->
+    <xsl:template name="show-track-info">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
+        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+
+        <xsl:call-template name="show-track-icon">
+            <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+        </xsl:call-template>
+
+        <xsl:call-template name="show-track-title">
+            <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+        </xsl:call-template>
+
+        <span class="track-states">
+            <xsl:call-template name="show-track-state-locked">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-muted">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-hidden">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-transparent">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-effects">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </span>
+
+        <!-- calculate total track length -->
+        <span class="track-length">
+            <xsl:call-template name="show-timecode">
+                <xsl:with-param name="frames">
+                    <xsl:call-template name="calc-track-length">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                    </xsl:call-template>
+                </xsl:with-param>
+            </xsl:call-template>
+        </span>
 
         <!-- internal information -->
-        <span class="anno-id"> (<i>track id: <xsl:value-of select="$track/@id"/>, MLT track index: <xsl:value-of select="$trackno"/></i>)</span>
+        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track-ref"/>", MLT track index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
     </xsl:template>
+
+
+    <!-- recursive function for finding the first video track -->
+    <xsl:template name="find-lowest-video-track">
+        <xsl:param name="mlt-track-idx" select="1"/>
+
+        <xsl:if test="$mlt-track-idx &lt; $num-timeline-tracks">
+            <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+            <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+
+            <xsl:choose>
+                <!-- audio-only track? search on! -->
+                <xsl:when test="$track/property[@name='kdenlive:audio_track']">
+                    <xsl:call-template name="find-lowest-video-track">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx + 1"/>
+                    </xsl:call-template>
+                </xsl:when>
+                <!-- try next upper track -->
+                <xsl:otherwise><xsl:value-of select="$mlt-track-idx"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
+    </xsl:template>
+
+
+    <xsl:variable name="timeline-lowest-video-track">
+        <xsl:call-template name="find-lowest-video-track"/>
+    </xsl:variable>
 
 
     <!-- One out of several purposes of the "main bin" playlist is to
@@ -908,7 +1191,8 @@
         <xsl:variable name="mm" select="format-number(floor(($frames div $fps) div 60) mod 60, '00')"/>
         <xsl:variable name="hh" select="format-number(floor(($frames div $fps) div 3600), '00')"/>
 
-        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>:<xsl:value-of select="$ff"/></tt> (<xsl:value-of select="$frames"/>)
+        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>.<xsl:value-of select="$ff"/></tt>
+        <!--(<xsl:value-of select="$frames"/>)-->
     </xsl:template>
 
 
@@ -1038,166 +1322,199 @@
     <xsl:key name="internal-composite-transition-by-a-track" match="transition[(property[@name='internal_added']/text()='237') and (not(property[@name='mlt_service']/text()='mix'))]" use="property[@name='a_track']"/>
 
     <!-- -->
-    <xsl:template name="video-compositing">
+    <xsl:template name="show-timeline-video-compositing">
         <h3><span class="in-track"><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-film" aria-hidden="true"/></span> Video Compositing</h3>
 
         <p>For automatic video track compositing, Kdenlives creates the following compositing transitions automatically behind the scenes.</p>
 
         <xsl:call-template name="timeline-compositing-info"/>
 
-        <!-- Get all internally added transitions which are NOT audio mixers. This
-             helps us with the different kind of compositing transitions currently
-             used by Kdenlive. In particular:
-             * composite
-             * movit.###
-             * qtblend
-             * frei0r.cairoblend
-          -->
-        <xsl:variable name="comptransitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][not(property[@name='mlt_service']/text()='mix')]"/>
-        <xsl:variable name="trackscount" select="count(/mlt/tractor[@id='maintractor']/track)-1"/>
 
-        <xsl:if test="count($comptransitions) &gt; 0">
-            <xsl:value-of select="count($comptransitions)"/> internally added automatic compositing transitions.
-
-            <xsl:for-each select="$comptransitions">
-                <!-- sort all implicitly added transitions by their a_track
-                     parameter, so that we get groups of compositing. Yes,
-                     the famous Muenchian method on the horizon...
-                  -->
-                <xsl:sort select="property[@name='a_track']/text()" data-type="number" order="descending"/>
-
-                <xsl:variable name="atrack" select="property[@name='a_track']"/>
-                <xsl:variable name="compositetracksbyatrack" select="key('internal-composite-transition-by-a-track',$atrack)"/>
-
-                <xsl:if test="generate-id() = generate-id($compositetracksbyatrack[1])">
-                    <!-- MLT transitions work on MLT track indices, which are 0-based,
-                         bottom to top track. In order to later get the proper track
-                         title we start with the B track MLT index for starters.
-                      -->
-                    <xsl:variable name="atrackmltidx" select="number(property[@name='a_track']/text())"/>
-                    <!-- Next, get the track id, which is, by the way, something along
-                         the lines of "playlist#". The track id allows us to locate the
-                         <playlist> acting as a track.
-                      -->
-                    <xsl:variable name="atrackid" select="/mlt/tractor[@id='maintractor']/track[$atrackmltidx+1]/@producer"/>
-                    <!-- Using the track id we can now look up the title as specified
-                         inside the <playlist> track element, using one of the many
-                         <property> child elements: the one being 'kdenlive:track_name'.
-                      -->
-                    <xsl:variable name="atracktitle" select="/mlt/playlist[@id=$atrackid]/property[@name='kdenlive:track_name']/text()"/>
-
-                    <ul class="tracks">
-                        <xsl:for-each select="$compositetracksbyatrack">
-                            <xsl:sort select="property[@name='b_track']/text()" data-type="number" order="descending"/>
-
-                            <!-- MLT transitions work on MLT track indices, which are 0-based,
-                                 bottom to top track. In order to later get the proper track
-                                 title we start with the B track MLT index for starters.
-                              -->
-                            <xsl:variable name="btrackmltidx" select="number(property[@name='b_track']/text())"/>
-                            <!-- Next, get the track id, which is, by the way, something along
-                                 the lines of "playlist#". The track id allows us to locate the
-                                 <playlist> acting as a track.
-                              -->
-                            <xsl:variable name="btrackid" select="/mlt/tractor[@id='maintractor']/track[$btrackmltidx+1]/@producer"/>
-                            <!-- Using the track id we can now look up the title as specified
-                                 inside the <playlist> track element, using one of the many
-                                 <property> child elements: the one being 'kdenlive:track_name'.
-                              -->
-                            <xsl:variable name="btracktitle" select="/mlt/playlist[@id=$btrackid]/property[@name='kdenlive:track_name']/text()"/>
-                            <li>
-                                <i class="fa fa-clone" aria-hidden="true" title="internally added mixing transition"/>&#160;&#160;
-                                <xsl:choose>
-                                    <xsl:when test="property[@name='disable']/text() = '1'">
-                                        <i class="fa fa-square-o anno-opaque"/>&#160;
-                                    </xsl:when>
-                                    <xsl:otherwise>
-                                        <i class="fa fa-delicious anno-composite"/>&#160;
-                                    </xsl:otherwise>
-                                </xsl:choose>
-                                <b><xsl:value-of select="$btracktitle"/></b>
-                                <span class="anno"> (<i>internal transition id: "<xsl:value-of select="@id"/>", MLT track indices B/A: <xsl:value-of select="$btrackmltidx"/>/<xsl:value-of select="$atrackmltidx"/>, type: <xsl:value-of select="property[@name='mlt_service']"/></i>)</span>
-                            </li>
-                        </xsl:for-each>
-                        <li>
-                            <i class="fa fa-fast-forward fa-rotate-90" aria-hidden="true"/>&#160; onto <b><xsl:value-of select="$atracktitle"/></b>
-                            <span class="anno"> (<i>MLT track index: <xsl:value-of select="$atrackmltidx"/></i>)</span>
-                        </li>
-                    </ul>
+        <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
+        <xsl:if test="$num-timeline-av-tracks &lt; $num-internally-added-compositing-transitions">
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>found <i>more</i> internally added video compositing transitions (<xsl:value-of select="$num-internally-added-compsiting-transitions"/>) than actual video tracks (<xsl:value-of select="$num-timeline-av-tracks"/>) in project &#8211; this project may need some
+                <xsl:if test="($num-internally-added-mix-transitions - $num-timeline-av-tracks) &gt; 1">
+                    <xsl:text> </xsl:text><b>serious</b>
                 </xsl:if>
-
-            </xsl:for-each>
+                <xsl:text> </xsl:text>XML cleanup.</p>
         </xsl:if>
+
+        <xsl:if test="$num-timeline-av-tracks - 1 &gt; $num-internally-added-compositing-transitions">
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>not enough internally-added video compositing transitions found; there are more tracks (<xsl:value-of select="$num-timeline-av-tracks"/>, not counting the lowest video track) than video compositors (<xsl:value-of select="$num-internally-added-compositing-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
+        </xsl:if>
+
+        <p>
+            <xsl:value-of select="$num-internally-added-compositing-transitions"/> internally added automatic compositing transitions.
+        </p>
+
+        <ul class="tracks">
+            <xsl:for-each select="$timeline-tracks">
+                <!-- We only need this loop for counting MLT track indices...! -->
+                <xsl:variable name="mlt-track-idx" select="$num-timeline-tracks - position()"/>
+
+                <li>
+                    <xsl:call-template name="show-track-icon">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                    </xsl:call-template>
+
+                    <xsl:call-template name="show-track-title">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                    </xsl:call-template>
+
+                    <!-- Are there any mix transitions whose B track covers the current
+                         track? And how many of them...?
+                      -->
+                    <xsl:variable name="track-comp-transitions" select="$internally-added-compositing-transitions[number(property[@name='b_track']) = $mlt-track-idx]"/>
+                    <xsl:variable name="class">
+                        <xsl:choose>
+                            <xsl:when test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) = 0)">anno</xsl:when>
+                            <xsl:when test="(($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)) or (($mlt-track-idx &gt; $timeline-lowest-video-track) and (count($track-comp-transitions) != 1))">error</xsl:when>
+                            <xsl:otherwise></xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:variable>
+
+                    <span class="{$class}">
+                        <xsl:if test="$mlt-track-idx &gt; $timeline-lowest-video-track">
+                             <i class="fa fa-film" aria-hidden="true" title="internally added compositing transition"/>
+                        </xsl:if>
+                        <xsl:if test="(count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
+                            &#160;<xsl:call-template name="error-icon"/>&#160;missing video compositor
+                        </xsl:if>
+                        <xsl:if test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)">
+                            &#160;<xsl:call-template name="error-icon"/>&#160;unneeded video compositor
+                        </xsl:if>
+                    </span>
+                    &#160;
+
+                    <xsl:if test="($timeline-compositing-mode = 'track') and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
+                        <span class="{$class}">
+                            <xsl:call-template name="show-track-state-transparent">
+                                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                                <xsl:with-param name="class" select="''"/>
+                            </xsl:call-template>
+                        </span>
+                    </xsl:if>
+
+                    <!-- There should be only one... -->
+                    <xsl:if test="count($track-comp-transitions) &gt; 0">
+                        <span class="{$class} anno">
+                            <xsl:for-each select="$track-comp-transitions">
+                                <xsl:variable name="a-track-idx" select="number(property[@name='a_track'])"/>
+
+                                (<i style="white-space: nowrap;"><!--
+
+                                --><xsl:if test="position() &gt; 1">needless </xsl:if><!--
+
+                                --><span title="transition id">"<xsl:value-of select="@id"/>"</span>,
+
+                                <span title="MLT track indices">B/A: <xsl:value-of select="$mlt-track-idx"/>/<xsl:if test="$a-track-idx != $timeline-lowest-video-track">
+                                        <xsl:call-template name="error-icon"/><span class="error"><xsl:value-of select="$a-track-idx"/></span>
+                                    </xsl:if><xsl:if test="$a-track-idx = $timeline-lowest-video-track">
+                                        <xsl:value-of select="$a-track-idx"/>
+                                    </xsl:if>
+                                </span>,
+
+                                <span title="transition type">type: <xsl:value-of select="property[@name='mlt_service']"/></span></i>)
+                            </xsl:for-each>
+                            </span>
+                    </xsl:if>
+                </li>
+            </xsl:for-each>
+        </ul>
     </xsl:template>
-
-
 
 
     <!-- Kdenlive's audio mixing happens in the background by adding the required
          MLT mix transitions.
       -->
-    <xsl:template name="audio-mixing">
+    <xsl:template name="show-timeline-audio-mixing">
         <h3><span class="in-track"><i class="fa fa-clone" aria-hidden="true"/>&#8201;<i class="fa fa-volume-up" aria-hidden="true"/></span> Audio Mixing</h3>
 
         <p>For automatic audio mixing, Kdenlive creates the following mix transitions automatically behind the scenes. These mix transitions get updated by Kdenlive only when adding or removing tracks. They don't get automatically refreshed when loading a project (at least not at this time), so be careful in case they got out of sync.</p>
 
-        <xsl:variable name="mixtransitions" select="$internally-added-mix-transitions"/>
-        <xsl:variable name="trackscount" select="count(/mlt/tractor[@id='maintractor']/track)-1"/>
-
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
-        <xsl:if test="$trackscount &lt; count($mixtransitions)">
-            <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>found <i>more</i> internally added audio mix transitions (<xsl:value-of select="count($mixtransitions)"/>) than actual tracks (<xsl:value-of select="$trackscount"/>) in project &#8211; this project may need some
-                <xsl:if test="(count($mixtransitions) - $trackscount) &gt; 1">
+        <xsl:if test="$num-timeline-user-tracks &lt; $num-internally-added-mix-transitions">
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>found <i>more</i> internally added audio mix transitions (<xsl:value-of select="$num-internally-added-mix-transitions"/>) than actual tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) in project &#8211; this project may need some
+                <xsl:if test="($num-internally-added-mix-transitions - $num-timeline-user-tracks) &gt; 1">
                     <xsl:text> </xsl:text><b>serious</b>
                 </xsl:if>
                 <xsl:text> </xsl:text>XML cleanup.</p>
         </xsl:if>
-        <xsl:if test="$trackscount &gt; count($mixtransitions)">
-            <p><span class="warning"><i class="fa fa-warning"/> Warning: </span>not enough internally-added audio mix transitions found; there are more tracks (<xsl:value-of select="$trackscount"/>) than audio mixers (<xsl:value-of select="count($mixtransitions)"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
+
+        <xsl:if test="$num-timeline-user-tracks &gt; $num-internally-added-mix-transitions">
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>not enough internally-added audio mix transitions found; there are more tracks (<xsl:value-of select="$num-timeline-user-tracks"/>) than audio mixers (<xsl:value-of select="$num-internally-added-mix-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
         </xsl:if>
 
         <p>
-            <xsl:if test="not($trackscount=count($mixtransitions))">
-                <span class="warning"><i class="fa fa-warning"/> Warning: </span>
+            <xsl:if test="$num-timeline-user-tracks != $num-internally-added-mix-transitions">
+                <xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>
             </xsl:if>
-            <xsl:value-of select="count($mixtransitions)"/> internally added mix transitions (for <xsl:value-of select="$trackscount"/>+1 tracks):
+            <xsl:value-of select="$num-internally-added-mix-transitions"/> internally added <i>mix</i> transitions (for <xsl:value-of select="$num-timeline-user-tracks"/>+1 tracks):
         </p>
 
         <ul class="tracks">
-            <!-- Iterate over all internally added(!) mix(!) transitions. Now this
-                 is XPath galore...!
-              -->
-            <xsl:for-each select="$mixtransitions">
-                <xsl:sort select="property[@name='b_track']/text()" data-type="number" order="descending"/>
+            <xsl:for-each select="$timeline-tracks">
+                <!-- We only need this loop for counting MLT track indices...! -->
+                <xsl:variable name="mlt-track-idx" select="$num-timeline-tracks - position()"/>
 
-                <!-- MLT transitions work on MLT track indices, which are 0-based,
-                     bottom to top track. In order to later get the proper track
-                     title we start with the B track MLT index for starters.
-                  -->
-                <xsl:variable name="trackmltidx" select="number(property[@name='b_track']/text())"/>
-                <!-- Next, get the track id, which is, by the way, something along
-                     the lines of "playlist#". The track id allows us to locate the
-                     <playlist> acting as a track.
-                  -->
-                <xsl:variable name="trackid" select="/mlt/tractor[@id='maintractor']/track[$trackmltidx+1]/@producer"/>
-                <!-- Using the track id we can now look up the title as specified
-                     inside the <playlist> track element, using one of the many
-                     <property> child elements: the one being 'kdenlive:track_name'.
-                  -->
-                <xsl:variable name="tracktitle" select="/mlt/playlist[@id=$trackid]/property[@name='kdenlive:track_name']/text()"/>
                 <li>
-                    <i class="fa fa-clone" aria-hidden="true" title="internally added mixing transition"/>&#160;
-                    <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>&#160;
-                    <b><xsl:value-of select="$tracktitle"/></b>
-                    <span class="anno"> (<i>internal transition id: "<xsl:value-of select="@id"/>", MLT track indices B/A: <xsl:value-of select="$trackmltidx"/>/<xsl:value-of select="number(property[@name='a_track']/text())"/></i>)</span>
+                    <xsl:call-template name="show-track-icon">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                    </xsl:call-template>
+
+                    <xsl:call-template name="show-track-title">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                    </xsl:call-template>
+
+                    <!-- Are there any mix transitions whose B track covers the current
+                         track? And how many of them...?
+                      -->
+                    <xsl:variable name="track-mixer-transitions" select="$internally-added-mix-transitions[number(property[@name='b_track']) = $mlt-track-idx]"/>
+                    <xsl:variable name="class">
+                        <xsl:choose>
+                            <xsl:when test="$mlt-track-idx = 0">anno</xsl:when>
+                            <xsl:when test="($mlt-track-idx &gt; 0) and (count($track-mixer-transitions) != 1)">error</xsl:when>
+                            <xsl:otherwise></xsl:otherwise>
+                        </xsl:choose>
+                    </xsl:variable>
+
+                    <span class="{$class}">
+                        <xsl:if test="$mlt-track-idx &gt; 0">
+                            <i class="fa fa-volume-up" aria-hidden="true" title="internally added mixing transition"/>
+                        </xsl:if>
+                        <xsl:if test="(count($track-mixer-transitions) = 0) and ($mlt-track-idx &gt; 0)">
+                            &#160;<xsl:call-template name="error-icon"/>&#160;missing audio mixer
+                        </xsl:if>
+                    </span>
+                    &#160;
+
+                    <!-- There really should be only one (mixer) ... per track. -->
+                    <xsl:if test="count($track-mixer-transitions) &gt; 0">
+                        <span class="{$class} anno">
+                            <xsl:for-each select="$track-mixer-transitions">
+                                <xsl:variable name="a-track-idx" select="number(property[@name='a_track'])"/>
+
+                                (<i style="white-space: nowrap;"><!--
+
+                                --><xsl:if test="position() &gt; 1"><xsl:call-template name="error-icon"/>&#160;needless </xsl:if><!--
+
+                                --><span title="transition id">"<xsl:value-of select="@id"/>"</span>,
+                                <span title="MLT track indices">B/A:
+                                    <xsl:value-of select="$mlt-track-idx"/>/<!--
+                                    --><xsl:choose>
+                                        <xsl:when test="$a-track-idx != 0">
+                                            <xsl:call-template name="error-icon"/>&#160;<span class="error"><xsl:value-of select="$a-track-idx"/> instead of 0</span>
+                                        </xsl:when>
+                                        <xsl:otherwise>0</xsl:otherwise>
+                                    </xsl:choose>
+                                </span></i>)
+                            </xsl:for-each>
+                            </span>
+                    </xsl:if>
                 </li>
             </xsl:for-each>
-            <li>
-                <i class="fa fa-fast-forward fa-rotate-90" aria-hidden="true"/>&#160; onto internal hidden black_track
-            </li>
         </ul>
     </xsl:template>
-
 
 
 </xsl:stylesheet>
