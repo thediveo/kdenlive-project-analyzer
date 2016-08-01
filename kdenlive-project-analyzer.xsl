@@ -1456,9 +1456,8 @@
 
         <xsl:call-template name="timeline-compositing-info"/>
 
-
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
-        <xsl:if test="$num-timeline-av-tracks &lt; $num-internally-added-compositing-transitions">
+        <xsl:if test="not($timeline-compositing-mode = 'none') and ($num-timeline-av-tracks &lt; $num-internally-added-compositing-transitions)">
             <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>found <i>more</i> internally added video compositing transitions (<xsl:value-of select="$num-internally-added-compsiting-transitions"/>) than actual video tracks (<xsl:value-of select="$num-timeline-av-tracks"/>) in project &#8211; this project may need some
                 <xsl:if test="($num-internally-added-mix-transitions - $num-timeline-av-tracks) &gt; 1">
                     <xsl:text> </xsl:text><b>serious</b>
@@ -1466,7 +1465,7 @@
                 <xsl:text> </xsl:text>XML cleanup.</p>
         </xsl:if>
 
-        <xsl:if test="$num-timeline-av-tracks - 1 &gt; $num-internally-added-compositing-transitions">
+        <xsl:if test="not($timeline-compositing-mode = 'none') and ($num-timeline-av-tracks - 1 &gt; $num-internally-added-compositing-transitions)">
             <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>not enough internally-added video compositing transitions found; there are more tracks (<xsl:value-of select="$num-timeline-av-tracks"/>, not counting the lowest video track) than video compositors (<xsl:value-of select="$num-internally-added-compositing-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
         </xsl:if>
 
