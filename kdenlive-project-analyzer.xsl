@@ -34,7 +34,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.9.4'"/>
+    <xsl:variable name="version" select="'0.9.5'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -725,10 +725,10 @@
                 <xsl:with-param name="frames">
                     <xsl:value-of select="$timeline-len"/>
                 </xsl:with-param>
-            </xsl:call-template>. <span class="anno">(<i>Please note that the hidden built-in "Black" track is always one frame longer than the overall timeline length, that is, taking only the user-visible timeline tracks into the overall length calculation.</i>)</span>
+            </xsl:call-template>. <span class="anno">(<i>Please note that for projects edited with Kdenlive 16.07.xx, 16.08, or later, the hidden built-in "Black" track is always one frame longer than the overall timeline length. The calculation of the overall timeline length is only taking user-visible timeline tracks into the overall length calculation. For older projects, the length of the "Black" tracks equals that of the overall timeline length.</i>)</span>
         </p>
 
-        <xsl:if test="$timeline-len != ($black-track-len - 1)">
+        <xsl:if test="($timeline-len != $black-track-len) and ($timeline-len != ($black-track-len - 1))">
             <xsl:call-template name="error-icon"/>&#160;
             <span class="error">
                 Error: the hidden built-in "Black" track (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$black-track-len"/></xsl:call-template>) is
