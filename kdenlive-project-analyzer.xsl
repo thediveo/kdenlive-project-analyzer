@@ -34,7 +34,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.9.3'"/>
+    <xsl:variable name="version" select="'0.9.4'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -70,6 +70,10 @@
                         margin-top: 3ex;
                         padding-bottom: 0.35ex;
                         border-bottom: solid #aaa 0.1ex;
+                    }
+
+                    tt {
+                        font-family: "monospace";
                     }
 
                     ul.project-bin-contents,
@@ -721,7 +725,7 @@
                 <xsl:with-param name="frames">
                     <xsl:value-of select="$timeline-len"/>
                 </xsl:with-param>
-            </xsl:call-template>.
+            </xsl:call-template>. <span class="anno">(<i>Please note that the hidden built-in "Black" track is always one frame longer than the overall timeline length, that is, taking only the user-visible timeline tracks into the overall length calculation.</i>)</span>
         </p>
 
         <xsl:if test="$timeline-len != ($black-track-len - 1)">
