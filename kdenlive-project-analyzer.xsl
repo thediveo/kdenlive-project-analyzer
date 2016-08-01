@@ -337,7 +337,7 @@
         <table class="borderless">
             <tbody>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">Timeline total length:</xsl:with-param>
+                    <xsl:with-param name="description">Overall timeline length:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:call-template name="show-timeline-length"/></xsl:with-param>
                 </xsl:call-template>
 
@@ -703,7 +703,7 @@
         </ul>
 
         <p>
-            The total timeline length is <xsl:call-template name="show-timeline-length"/>.
+            The overall timeline length is <xsl:call-template name="show-timeline-length"/>.
         </p>
 
         <p>
@@ -763,7 +763,7 @@
 
         <xsl:choose>
             <xsl:when test="$len-by-clip &gt;= $len-by-transition">
-                <span title="track length, determinded by overhanging transition">
+                <span title="track length, determinded by last clip">
                     <xsl:call-template name="show-timecode">
                         <xsl:with-param name="frames">
                             <xsl:value-of select="$len-by-clip"/>
@@ -772,7 +772,7 @@
                 </span>
             </xsl:when>
             <xsl:otherwise>
-                <span title="track length, as determined by last clip">
+                <span title="track length, as determined by overhanging transition">
                     <xsl:call-template name="show-timecode">
                         <xsl:with-param name="frames">
                             <xsl:value-of select="$len-by-transition"/>
@@ -981,7 +981,7 @@
     </xsl:template>
 
 
-    <!-- Calculate total length of a track in frames -->
+    <!-- Calculate total length of a track in frames, based on clips -->
     <xsl:template name="calc-track-length">
         <xsl:param name="mlt-track-idx"/>
 
@@ -998,11 +998,29 @@
     <xsl:template name="max-timeline-length">
         <xsl:param name="mlt-track-idx" select="1"/>
 
-        <xsl:variable name="len">
+        <xsl:variable name="transitions-track-len">
+            <xsl:call-template name="calc-track-transitions-end">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:variable name="clips-track-len">
             <xsl:call-template name="calc-track-length">
                 <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
             </xsl:call-template>
         </xsl:variable>
+
+        <xsl:variable name="len">
+            <xsl:choose>
+                <xsl:when test="$clips-track-len &gt;= $transitions-track-len">
+                    <xsl:value-of select="$clips-track-len"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$transitions-track-len"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
         <xsl:choose>
             <xsl:when test="$mlt-track-idx &lt; $num-timeline-tracks">
                 <xsl:variable name="maxlen">
@@ -1257,7 +1275,7 @@
         <xsl:variable name="mm" select="format-number(floor(($frames div $fps) div 60) mod 60, '00')"/>
         <xsl:variable name="hh" select="format-number(floor(($frames div $fps) div 3600), '00')"/>
 
-        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>.<xsl:value-of select="$ff"/></tt>
+        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>:<xsl:value-of select="$ff"/></tt>
         <!--(<xsl:value-of select="$frames"/>)-->
     </xsl:template>
 
