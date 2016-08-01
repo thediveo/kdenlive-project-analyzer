@@ -22,7 +22,8 @@
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:regexp="http://exslt.org/regular-expressions"
-                extension-element-prefixes="regexp">
+                xmlns:math="http://exslt.org/math"
+                extension-element-prefixes="regexp math">
 
     <!-- Produce HTML5 document on an XSLT processor which does not
          support disable-output-escaping in order to generate the
@@ -33,7 +34,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.9.1'"/>
+    <xsl:variable name="version" select="'0.9.3'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -336,7 +337,7 @@
         <table class="borderless">
             <tbody>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">Timeline total length:</xsl:with-param>
+                    <xsl:with-param name="description">Overall timeline length:</xsl:with-param>
                     <xsl:with-param name="copy"><xsl:call-template name="show-timeline-length"/></xsl:with-param>
                 </xsl:call-template>
 
@@ -701,9 +702,47 @@
             </xsl:for-each>
         </ul>
 
+        <!-- Check the hidden built-in black track #0 to match the overall
+             timeline length as calculated on the basis of all user tracks,
+             with indices from #1 on.
+          -->
+        <xsl:variable name="black-track-len">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="0"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="timeline-len">
+            <xsl:call-template name="max-timeline-length"/>
+        </xsl:variable>
+
         <p>
-            The total timeline length is <xsl:call-template name="show-timeline-length"/>.
+            The overall timeline length is
+            <xsl:call-template name="show-timecode">
+                <xsl:with-param name="frames">
+                    <xsl:value-of select="$timeline-len"/>
+                </xsl:with-param>
+            </xsl:call-template>.
         </p>
+
+        <xsl:if test="$timeline-len != ($black-track-len - 1)">
+            <xsl:call-template name="error-icon"/>&#160;
+            <span class="error">
+                Error: the hidden built-in "Black" track (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$black-track-len"/></xsl:call-template>) is
+                <xsl:choose>
+                    <!-- The black track actually seems to be always one frame longer
+                         than the overall timeline length; probably so users can
+                         add or insert clips at the end after the last clip?
+                      -->
+                    <xsl:when test="$timeline-len &gt; ($black-track-len - 1)">
+                        shorter
+                    </xsl:when>
+                    <xsl:otherwise>
+                        longer
+                    </xsl:otherwise>
+                </xsl:choose>
+                than the overall timeline length (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$timeline-len"/></xsl:call-template>)!
+            </span>
+        </xsl:if>
 
         <p>
             The bottommost <i>video</i> track is track
@@ -713,6 +752,73 @@
             </xsl:call-template>"
             <span class="anno">(<i>MLT track index: <xsl:value-of select="$timeline-lowest-video-track"/></i>)</span>
         </p>
+    </xsl:template>
+
+
+    <!-- ### -->
+    <xsl:template name="calc-track-transitions-end">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="user-transitions" select="/mlt/tractor[@id='maintractor']/transition[not(property[@name='internal_added']) and property[@name='b_track'] = $mlt-track-idx]"/>
+
+        <xsl:choose>
+            <xsl:when test="count($user-transitions) = 0">
+                0
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="math:max($user-transitions/@out)"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
+    <xsl:template name="show-track-transitions-end">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:call-template name="show-timecode">
+            <xsl:with-param name="frames">
+                <xsl:call-template name="calc-track-transitions-end">
+                    <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                </xsl:call-template>
+            </xsl:with-param>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <xsl:template name="track-total-length-timecode">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="len-by-clip">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="len-by-transition">
+            <xsl:call-template name="calc-track-transitions-end">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:choose>
+            <xsl:when test="$len-by-clip &gt;= $len-by-transition">
+                <span title="track length, determinded by last clip">
+                    <xsl:call-template name="show-timecode">
+                        <xsl:with-param name="frames">
+                            <xsl:value-of select="$len-by-clip"/>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </span>
+            </xsl:when>
+            <xsl:otherwise>
+                <span title="track length, as determined by overhanging transition">
+                    <xsl:call-template name="show-timecode">
+                        <xsl:with-param name="frames">
+                            <xsl:value-of select="$len-by-transition"/>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </span>
+            </xsl:otherwise>
+        </xsl:choose>
     </xsl:template>
 
 
@@ -913,28 +1019,51 @@
     </xsl:template>
 
 
-    <!-- Calculate total length of a track in frames -->
+    <!-- Calculate total length of a track in frames, based on clips -->
     <xsl:template name="calc-track-length">
         <xsl:param name="mlt-track-idx"/>
 
         <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
         <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+        <xsl:variable name="clips" select="$track-playlist/entry"/>
 
         <xsl:variable name="s" select="sum($track-playlist/blank/@length)"/>
-        <xsl:variable name="i" select="sum($track-playlist/entry/@in)"/>
-        <xsl:variable name="o" select="sum($track-playlist/entry/@out)"/>
-        <xsl:value-of select="$o - $i + $s"/>
+        <xsl:variable name="i" select="sum($clips/@in)"/>
+        <xsl:variable name="o" select="sum($clips/@out)"/>
+        <!-- clip/entry lengths are actually out-in+1, so we need to correct the
+             sums calculated from outs-ins...
+          -->
+        <xsl:variable name="c" select="count($clips)"/>
+        <xsl:value-of select="($o - $i) + $c + $s"/>
     </xsl:template>
 
 
     <xsl:template name="max-timeline-length">
         <xsl:param name="mlt-track-idx" select="1"/>
 
-        <xsl:variable name="len">
+        <xsl:variable name="transitions-track-len">
+            <xsl:call-template name="calc-track-transitions-end">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:variable name="clips-track-len">
             <xsl:call-template name="calc-track-length">
                 <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
             </xsl:call-template>
         </xsl:variable>
+
+        <xsl:variable name="len">
+            <xsl:choose>
+                <xsl:when test="$clips-track-len &gt;= $transitions-track-len">
+                    <xsl:value-of select="$clips-track-len"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$transitions-track-len"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
         <xsl:choose>
             <xsl:when test="$mlt-track-idx &lt; $num-timeline-tracks">
                 <xsl:variable name="maxlen">
@@ -1009,14 +1138,12 @@
             </xsl:call-template>
         </span>
 
-        <!-- calculate total track length -->
+        <!-- calculate total track length on the basis of clips and
+             transitions
+          -->
         <span class="track-length">
-            <xsl:call-template name="show-timecode">
-                <xsl:with-param name="frames">
-                    <xsl:call-template name="calc-track-length">
-                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
-                    </xsl:call-template>
-                </xsl:with-param>
+            <xsl:call-template name="track-total-length-timecode">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
             </xsl:call-template>
         </span>
 
@@ -1191,7 +1318,7 @@
         <xsl:variable name="mm" select="format-number(floor(($frames div $fps) div 60) mod 60, '00')"/>
         <xsl:variable name="hh" select="format-number(floor(($frames div $fps) div 3600), '00')"/>
 
-        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>.<xsl:value-of select="$ff"/></tt>
+        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>:<xsl:value-of select="$ff"/></tt>
         <!--(<xsl:value-of select="$frames"/>)-->
     </xsl:template>
 
@@ -1329,9 +1456,8 @@
 
         <xsl:call-template name="timeline-compositing-info"/>
 
-
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
-        <xsl:if test="$num-timeline-av-tracks &lt; $num-internally-added-compositing-transitions">
+        <xsl:if test="not($timeline-compositing-mode = 'none') and ($num-timeline-av-tracks &lt; $num-internally-added-compositing-transitions)">
             <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>found <i>more</i> internally added video compositing transitions (<xsl:value-of select="$num-internally-added-compsiting-transitions"/>) than actual video tracks (<xsl:value-of select="$num-timeline-av-tracks"/>) in project &#8211; this project may need some
                 <xsl:if test="($num-internally-added-mix-transitions - $num-timeline-av-tracks) &gt; 1">
                     <xsl:text> </xsl:text><b>serious</b>
@@ -1339,7 +1465,7 @@
                 <xsl:text> </xsl:text>XML cleanup.</p>
         </xsl:if>
 
-        <xsl:if test="$num-timeline-av-tracks - 1 &gt; $num-internally-added-compositing-transitions">
+        <xsl:if test="not($timeline-compositing-mode = 'none') and ($num-timeline-av-tracks - 1 &gt; $num-internally-added-compositing-transitions)">
             <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>not enough internally-added video compositing transitions found; there are more tracks (<xsl:value-of select="$num-timeline-av-tracks"/>, not counting the lowest video track) than video compositors (<xsl:value-of select="$num-internally-added-compositing-transitions"/>) in project &#8211; this project need its internally added mix transitions <b>rebuilt</b>, as audio mixing is currently incorrect.</p>
         </xsl:if>
 
@@ -1374,10 +1500,10 @@
                     </xsl:variable>
 
                     <span class="{$class}">
-                        <xsl:if test="$mlt-track-idx &gt; $timeline-lowest-video-track">
+                        <xsl:if test="not($timeline-compositing-mode = 'none') and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
                              <i class="fa fa-film" aria-hidden="true" title="internally added compositing transition"/>
                         </xsl:if>
-                        <xsl:if test="(count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
+                        <xsl:if test="not($timeline-compositing-mode = 'none') and (count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
                             &#160;<xsl:call-template name="error-icon"/>&#160;missing video compositor
                         </xsl:if>
                         <xsl:if test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)">
