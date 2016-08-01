@@ -22,7 +22,8 @@
 <xsl:stylesheet version="1.0"
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:regexp="http://exslt.org/regular-expressions"
-                extension-element-prefixes="regexp">
+                xmlns:math="http://exslt.org/math"
+                extension-element-prefixes="regexp math">
 
     <!-- Produce HTML5 document on an XSLT processor which does not
          support disable-output-escaping in order to generate the
@@ -33,7 +34,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.9.1'"/>
+    <xsl:variable name="version" select="'0.9.2'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -716,6 +717,73 @@
     </xsl:template>
 
 
+    <!-- ### -->
+    <xsl:template name="calc-track-transitions-end">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="user-transitions" select="/mlt/tractor[@id='maintractor']/transition[not(property[@name='internal_added']) and property[@name='b_track'] = $mlt-track-idx]"/>
+
+        <xsl:choose>
+            <xsl:when test="count($user-transitions) = 0">
+                0
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="math:max($user-transitions/@out)"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
+    <xsl:template name="show-track-transitions-end">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:call-template name="show-timecode">
+            <xsl:with-param name="frames">
+                <xsl:call-template name="calc-track-transitions-end">
+                    <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                </xsl:call-template>
+            </xsl:with-param>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <xsl:template name="track-total-length-timecode">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="len-by-clip">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="len-by-transition">
+            <xsl:call-template name="calc-track-transitions-end">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:choose>
+            <xsl:when test="$len-by-clip &gt;= $len-by-transition">
+                <span title="track length, determinded by overhanging transition">
+                    <xsl:call-template name="show-timecode">
+                        <xsl:with-param name="frames">
+                            <xsl:value-of select="$len-by-clip"/>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </span>
+            </xsl:when>
+            <xsl:otherwise>
+                <span title="track length, as determined by last clip">
+                    <xsl:call-template name="show-timecode">
+                        <xsl:with-param name="frames">
+                            <xsl:value-of select="$len-by-transition"/>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </span>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
     <!-- Show appropriate icon depending on type of track.
       -->
     <xsl:template name="show-track-icon">
@@ -1009,14 +1077,12 @@
             </xsl:call-template>
         </span>
 
-        <!-- calculate total track length -->
+        <!-- calculate total track length on the basis of clips and
+             transitions
+          -->
         <span class="track-length">
-            <xsl:call-template name="show-timecode">
-                <xsl:with-param name="frames">
-                    <xsl:call-template name="calc-track-length">
-                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
-                    </xsl:call-template>
-                </xsl:with-param>
+            <xsl:call-template name="track-total-length-timecode">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
             </xsl:call-template>
         </span>
 
