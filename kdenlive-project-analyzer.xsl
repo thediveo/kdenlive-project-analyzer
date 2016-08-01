@@ -740,7 +740,7 @@
                         longer
                     </xsl:otherwise>
                 </xsl:choose>
-                then the overall timeline length (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$timeline-len"/></xsl:call-template>)!
+                than the overall timeline length (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$timeline-len"/></xsl:call-template>)!
             </span>
         </xsl:if>
 
