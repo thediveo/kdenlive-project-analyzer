@@ -1500,10 +1500,10 @@
                     </xsl:variable>
 
                     <span class="{$class}">
-                        <xsl:if test="$mlt-track-idx &gt; $timeline-lowest-video-track">
+                        <xsl:if test="not($timeline-compositing-mode = 'none') and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
                              <i class="fa fa-film" aria-hidden="true" title="internally added compositing transition"/>
                         </xsl:if>
-                        <xsl:if test="(count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
+                        <xsl:if test="not($timeline-compositing-mode = 'none') and (count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
                             &#160;<xsl:call-template name="error-icon"/>&#160;missing video compositor
                         </xsl:if>
                         <xsl:if test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)">
