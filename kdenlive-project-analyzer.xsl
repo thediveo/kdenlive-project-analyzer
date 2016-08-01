@@ -34,7 +34,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.9.2'"/>
+    <xsl:variable name="version" select="'0.9.3'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -702,9 +702,43 @@
             </xsl:for-each>
         </ul>
 
+        <!-- Check the hidden built-in black track #0 to match the overall
+             timeline length as calculated on the basis of all user tracks,
+             with indices from #1 on.
+          -->
+        <xsl:variable name="black-track-len">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="0"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="timeline-len">
+            <xsl:call-template name="max-timeline-length"/>
+        </xsl:variable>
+
         <p>
-            The overall timeline length is <xsl:call-template name="show-timeline-length"/>.
+            The overall timeline length is
+            <xsl:call-template name="show-timecode">
+                <xsl:with-param name="frames">
+                    <xsl:value-of select="$timeline-len"/>
+                </xsl:with-param>
+            </xsl:call-template>.
         </p>
+
+        <xsl:if test="$timeline-len != $black-track-len">
+            <xsl:call-template name="error-icon"/>&#160;
+            <span class="error">
+                Error: the hidden built-in "Black" track (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$black-track-len"/></xsl:call-template>) is
+                <xsl:choose>
+                    <xsl:when test="$timeline-len &gt; $black-track-len">
+                        shorter
+                    </xsl:when>
+                    <xsl:otherwise>
+                        longer
+                    </xsl:otherwise>
+                </xsl:choose>
+                then the overall timeline length (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$timeline-len"/></xsl:call-template>)!
+            </span>
+        </xsl:if>
 
         <p>
             The bottommost <i>video</i> track is track
@@ -987,11 +1021,16 @@
 
         <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
         <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+        <xsl:variable name="clips" select="$track-playlist/entry"/>
 
         <xsl:variable name="s" select="sum($track-playlist/blank/@length)"/>
-        <xsl:variable name="i" select="sum($track-playlist/entry/@in)"/>
-        <xsl:variable name="o" select="sum($track-playlist/entry/@out)"/>
-        <xsl:value-of select="$o - $i + $s"/>
+        <xsl:variable name="i" select="sum($clips/@in)"/>
+        <xsl:variable name="o" select="sum($clips/@out)"/>
+        <!-- clip/entry lengths are actually out-in+1, so we need to correct the
+             sums calculated from outs-ins...
+          -->
+        <xsl:variable name="c" select="count($clips)"/>
+        <xsl:value-of select="($o - $i) + $c + $s"/>
     </xsl:template>
 
 
