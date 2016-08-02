@@ -53,7 +53,7 @@
                 <title>Kdenlive Project Disection</title>
 
                 <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css"/>
-                <link rel="stylesheet" href="kdenlive-project.analyzer.css"/>
+                <link rel="stylesheet" href="kdenlive-project-analyzer.css"/>
             </head>
             <body>
                 <h1><img src="64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
