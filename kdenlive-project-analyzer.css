@@ -1,0 +1,144 @@
+/*
+     Kdenlive Project XML Analyzer
+     (c) 2016 Harald Albrecht
+
+     This program is free software: you can redistribute it and/or modify
+     it under the terms of the GNU General Public License as published by
+     the Free Software Foundation, either version 3 of the License, or
+     (at your option) any later version.
+
+     This program is distributed in the hope that it will be useful,
+     but WITHOUT ANY WARRANTY; without even the implied warranty of
+     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+     GNU General Public License for more details.
+
+     You should have received a copy of the GNU General Public License
+     along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*/
+body {
+    font-family: Arial, sans-serif;
+}
+
+h2 {
+    margin-top: 2.5ex;
+    padding-bottom: 0.35ex;
+    border-bottom: solid #aaa 0.2ex;
+}
+
+h3 {
+    max-width: 15em;
+    margin-top: 3ex;
+    padding-bottom: 0.35ex;
+    border-bottom: solid #aaa 0.1ex;
+}
+
+tt {
+    font-family: monospace;
+}
+
+ul.project-bin-contents,
+ul.project-bin-contents ul,
+ul.project-clips,
+ul.tracks {
+    list-style: none;
+}
+
+ul.project-bin-contents,
+ul.project-clips,
+ul.tracks {
+    padding-left: 0.5em;
+}
+
+ul.project-bin-contents ul {
+    padding-left: 2em;
+}
+
+ul.tracks li {
+    border-top: 0.3ex dotted #aaa;
+    padding-top: .75ex;
+    padding-bottom: .75ex;
+    padding-left: 0.75em;
+    padding-right: 0.75em;
+}
+
+ul.tracks li:last-child {
+    border-bottom: 0.3ex dotted #aaa;
+}
+
+li {
+    padding-top: 0.6ex;
+}
+
+.warning {
+    font-weight: bolder !important;
+    color: #c80 !important;
+}
+
+.error {
+    font-weight: bolder !important;
+    color: #800 !important;
+}
+
+.anno-id, .anno {
+    color: #777;
+}
+
+.anno-unlocked,
+.anno-opaque,
+.anno-visible,
+.anno-audible {
+    color: #777;
+}
+
+.anno-locked,
+.anno-hidden,
+.anno-muted {
+    color: #900;
+}
+
+.in-track {
+    font-size: 80%;
+    border-top: 0.3ex dotted;
+    border-bottom: 0.3ex dotted;
+    padding: 0.35ex 0.6em;
+    background-color: rgba(0,0,0,0.08);
+}
+
+table.borderless {
+    border-width: 0;
+}
+
+table.borderless td {
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-top: 0.3ex;
+}
+
+.track-icon {
+    display: inline-block;
+    width: 2.7em;
+}
+
+.track-title {
+    display: inline-block;
+    text-overflow: ellipsis;
+    width: 15em;
+    white-space: nowrap;
+    overflow: hidden !important;
+    vertical-align: middle;
+}
+
+.track-states {
+    display: inline-block;
+    width: 11em;
+}
+
+.track-length {
+    display: inline-block;
+    width: 8em;
+}
+
+.fix-fa {
+    width: 1.7em;
+    float: left;
+}
