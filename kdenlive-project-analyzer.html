@@ -19,6 +19,8 @@
 <html>
     <head>
         <title>Kdenlive Project Disector</title>
+        <link rel="stylesheet" href="kdenlive-project.analyzer.css"/>
+        <script type="text/javascript" language="javascript" src="Saxonce/Saxonce.nocache.js"></script>
     </head>
     
     <body>
@@ -42,8 +44,9 @@
                 xsltr.open("GET", "kdenlive-project-analyzer.xsl", false);
                 xsltr.send(null);
                 var xslt = xsltr.responseXML;
-                var xsltp = new XSLTProcessor();
-                xsltp.importStylesheet(xslt);
+                //var xsltp = new XSLTProcessor();
+                var xsltp = new Saxon.newXSLT20Processor(xslt);
+                //xsltp.importStylesheet(xslt);
                 var analysis = xsltp.transformToFragment(xml, document);
                 document.getElementById("disection").innerHTML = "";
                 document.getElementById("disection").appendChild(analysis);

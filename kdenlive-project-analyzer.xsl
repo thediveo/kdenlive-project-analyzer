@@ -41,7 +41,7 @@
          a slightly involved concept. A clip name is either its name as explicitly
          assigned by the user, or the filename+extension, but without its file path.
       -->
-    <xsl:key name="clipkey" match="producer" use="substring(concat(regexp:replace(property[@name='resource'],'.*/','gi',''),property[@name='kdenlive:clipname']),1,1)"/>
+    <xsl:key name="clipkey" match="producer" use="substring(concat(replace(property[@name='resource'],'.*/',''),property[@name='kdenlive:clipname']),1,1)"/>
 
 
     <!-- Generate the XHTML document head and body as we just start disecting
@@ -53,137 +53,7 @@
                 <title>Kdenlive Project Disection</title>
 
                 <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css"/>
-
-                <style type="text/css"><![CDATA[
-                    body {
-                        font-family: Arial, sans-serif;
-                    }
-
-                    h2 {
-                        margin-top: 2.5ex;
-                        padding-bottom: 0.35ex;
-                        border-bottom: solid #aaa 0.2ex;
-                    }
-
-                    h3 {
-                        max-width: 15em;
-                        margin-top: 3ex;
-                        padding-bottom: 0.35ex;
-                        border-bottom: solid #aaa 0.1ex;
-                    }
-
-                    tt {
-                        font-family: "monospace";
-                    }
-
-                    ul.project-bin-contents,
-                    ul.project-bin-contents ul,
-                    ul.project-clips,
-                    ul.tracks {
-                        list-style: none;
-                    }
-
-                    ul.project-bin-contents,
-                    ul.project-clips,
-                    ul.tracks {
-                        padding-left: 0.5em;
-                    }
-
-                    ul.project-bin-contents ul {
-                        padding-left: 2em;
-                    }
-
-                    ul.tracks li {
-                        border-top: 0.3ex dotted #aaa;
-                        padding-top: .75ex;
-                        padding-bottom: .75ex;
-                        padding-left: 0.75em;
-                        padding-right: 0.75em;
-                    }
-
-                    ul.tracks li:last-child {
-                        border-bottom: 0.3ex dotted #aaa;
-                    }
-
-                    li {
-                        padding-top: 0.6ex;
-                    }
-
-                    .warning {
-                        font-weight: bolder !important;
-                        color: #c80 !important;
-                    }
-
-                    .error {
-                        font-weight: bolder !important;
-                        color: #800 !important;
-                    }
-
-                    .anno-id, .anno {
-                        color: #777;
-                    }
-
-                    .anno-unlocked,
-                    .anno-opaque,
-                    .anno-visible,
-                    .anno-audible {
-                        color: #777;
-                    }
-
-                    .anno-locked,
-                    .anno-hidden,
-                    .anno-muted {
-                        color: #900;
-                    }
-
-                    .in-track {
-                        font-size: 80%;
-                        border-top: 0.3ex dotted;
-                        border-bottom: 0.3ex dotted;
-                        padding: 0.35ex 0.6em;
-                        background-color: rgba(0,0,0,0.08);
-                    }
-
-                    table.borderless {
-                        border-width: 0;
-                    }
-
-                    table.borderless td {
-                        padding-left: 0.5em;
-                        padding-right: 0.5em;
-                        padding-top: 0.3ex;
-                    }
-
-                    .track-icon {
-                        display: inline-block;
-                        width: 2.7em;
-                    }
-
-                    .track-title {
-                        display: inline-block;
-                        text-overflow: ellipsis;
-                        width: 15em;
-                        white-space: nowrap;
-                        overflow: hidden !important;
-                        vertical-align: middle;
-                    }
-
-                    .track-states {
-                        display: inline-block;
-                        width: 11em;
-                    }
-
-                    .track-length {
-                        display: inline-block;
-                        width: 8em;
-                    }
-
-                    .fix-fa {
-                        width: 1.7em;
-                        float: left;
-                    }
-
-                ]]></style>
+                <link rel="stylesheet" href="kdenlive-project.analyzer.css"/>
             </head>
             <body>
                 <h1><img src="64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
@@ -770,7 +640,7 @@
                 0
             </xsl:when>
             <xsl:otherwise>
-                <xsl:value-of select="math:max($user-transitions/@out)"/>
+                <xsl:value-of select="max($user-transitions/@out)"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
@@ -1268,7 +1138,7 @@
                  especially clips; the name for which to sort is the clip name, if
                  explicitly set. If unset, then the clips basename+ext is used for
                  sorting. -->
-            <xsl:sort select="concat(regexp:replace(property[@name='resource'],'.*/','gi',''),property[@name='kdenlive:clipname'])" order="ascending"/>
+            <xsl:sort select="concat(replace(property[@name='resource'],'.*/',''),property[@name='kdenlive:clipname'])" order="ascending"/>
             <xsl:variable name="clipid" select="@id"/>
             <xsl:if test="not(contains($clipid,'_'))">
                 <li>
@@ -1287,7 +1157,7 @@
                                     <xsl:value-of select="property[@name='kdenlive:clipname']"/>
                                 </xsl:when>
                                 <xsl:otherwise>
-                                    <xsl:value-of select="regexp:replace(property[@name='resource'],'.*/','gi','')"/>
+                                    <xsl:value-of select="replace(property[@name='resource'],'.*/','')"/>
                                 </xsl:otherwise>
                             </xsl:choose>
 
@@ -1364,7 +1234,7 @@
                              .all. instead of a filename.
                           -->
                         <xsl:choose>
-                            <xsl:when test="starts-with(regexp:replace(property[@name='resource'],'.*/','gi',''),'.all.')">
+                            <xsl:when test="starts-with(replace(property[@name='resource'],'.*/',''),'.all.')">
                                 <xsl:call-template name="image-sequence-clip-icon"/>&#160;
                             </xsl:when>
                             <xsl:otherwise>
@@ -1407,7 +1277,7 @@
                      we thus simply concatenate the clip name (which can be empty) with
                      the name+ext of the clip filename.
                   -->
-                <xsl:sort select="concat(property[@name='kdenlive:clipname'],regexp:replace(property[@name='resource'],'.*/','gi',''),property[@name='resource'])" data-type="text" order="ascending"/>
+                <xsl:sort select="concat(property[@name='kdenlive:clipname'],replace(property[@name='resource'],'.*/',''),property[@name='resource'])" data-type="text" order="ascending"/>
                 <xsl:variable name="clipid" select="@id"/>
                 <xsl:if test="not(contains($clipid,'_'))">
                     <li>
@@ -1420,7 +1290,7 @@
                                     <xsl:value-of select="property[@name='kdenlive:clipname']"/>
                                 </xsl:when>
                                 <xsl:otherwise>
-                                    <xsl:value-of select="regexp:replace(property[@name='resource'],'.*/','gi','')"/>
+                                    <xsl:value-of select="replace(property[@name='resource'],'.*/','')"/>
                                 </xsl:otherwise>
                             </xsl:choose>
                         </xsl:variable>
@@ -1462,7 +1332,7 @@
 
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
         <xsl:if test="not($timeline-compositing-mode = 'none') and ($num-timeline-av-tracks &lt; $num-internally-added-compositing-transitions)">
-            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>found <i>more</i> internally added video compositing transitions (<xsl:value-of select="$num-internally-added-compsiting-transitions"/>) than actual video tracks (<xsl:value-of select="$num-timeline-av-tracks"/>) in project &#8211; this project may need some
+            <p><xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>found <i>more</i> internally added video compositing transitions (<xsl:value-of select="$num-internally-added-compositing-transitions"/>) than actual video tracks (<xsl:value-of select="$num-timeline-av-tracks"/>) in project &#8211; this project may need some
                 <xsl:if test="($num-internally-added-mix-transitions - $num-timeline-av-tracks) &gt; 1">
                     <xsl:text> </xsl:text><b>serious</b>
                 </xsl:if>
