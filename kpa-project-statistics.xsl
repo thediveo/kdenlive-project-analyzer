@@ -23,7 +23,10 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 
-    <!-- Display statistics about this Kdenlive project.
+    <!-- Lies, damned lies, and statistcis: display some nice statistics
+         about this Kdenlive project. Don't know whether this actually makes
+         sense, but it surely may give you a warm feeling when you can
+         brag about your timeline having more clips and transitions as mine... ;)
       -->
     <xsl:template name="show-kdenlive-project-statistics">
         <table class="borderless">
@@ -45,10 +48,14 @@
                     <xsl:with-param name="description">&#8230; audio tracks:</xsl:with-param>
                     <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-timeline-audio-tracks"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
                 </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">&#8230; timeline clips:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-timeline-clips"/> &#215; <i class="fa fa-files-o" title="timeline clips"/></xsl:with-param>
+                </xsl:call-template>
 
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">Number of bin clips:</xsl:with-param>
-                    <xsl:with-param name="copy"><xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-files-o" title="bin clip"/></xsl:with-param>
+                    <xsl:with-param name="copy"><xsl:value-of select="$bin-num-master-clips"/> &#215; <i class="fa fa-files-o" title="bin clips"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">&#8230; audio-only clips:</xsl:with-param>
@@ -90,12 +97,12 @@
                     <xsl:with-param name="copy"><xsl:value-of select="$num-internally-added-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">&#8230; audio mixers:</xsl:with-param>
-                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
-                </xsl:call-template>
-                <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">&#8230; video compositors:</xsl:with-param>
                     <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-internally-added-compositing-transitions"/> &#215; <xsl:call-template name="video-track-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">&#8230; audio mixers:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
                 </xsl:call-template>
            </tbody>
         </table>

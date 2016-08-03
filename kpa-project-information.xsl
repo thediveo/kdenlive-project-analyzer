@@ -33,6 +33,10 @@
                 <table class="borderless">
                     <tbody>
                         <xsl:call-template name="show-description-with-value">
+                            <xsl:with-param name="description">Kdenlive project:</xsl:with-param>
+                            <xsl:with-param name="text" select="$project-name"/>
+                        </xsl:call-template>
+                        <xsl:call-template name="show-description-with-value">
                             <xsl:with-param name="description">Kdenlive project ID:</xsl:with-param>
                             <xsl:with-param name="text" select="$project/property[@name='kdenlive:docproperties.documentid']"/>
                         </xsl:call-template>

@@ -18,40 +18,124 @@
   -->
 <html>
     <head>
-        <title>Kdenlive Project Disector</title>
+        <title>Kdenlive Project Analyzer</title>
+
+        <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css"/>
         <link rel="stylesheet" href="kdenlive-project-analyzer.css"/>
+
         <script type="text/javascript" language="javascript" src="Saxonce/Saxonce.nocache.js"></script>
     </head>
 
     <body>
-        <form>
-            <p><input type="file" name="file" id="file" accept=".kdenlive"></input></p>
+        <p id="loader-msg">
+            <i class="fa fa-spinner fa-pulse fa-fw"/></i>&#160;Loading Kdenlive Project Analyzer, please wait...
+        </p>
+        <form id="project-form" style="display: none;">
+            <p><i class="fa fa-file-text-o">&#160;</i><input type="file" name="file" id="file" accept=".kdenlive"></input></p>
         </form>
+        <p id="analyzing-msg" style="display: none;">
+            <i class="fa fa-spinner fa-pulse fa-fw"></i>&#160;Analyzing your Kdenlive project, please wait...
+        </p>
 
-        <p id="disection"></p>
+        <div id="analysis-report"></div>
     </body>
 
     <script>
+        //
+        // Only after the (JavaScript/ECMAScript) XSLT processor has been
+        // fully loaded, enable the form to select and load a Kdenlive
+        // project file, and hide the temporary loading message.
+        //
+        onSaxonLoad = function() {
+            console.log("XSLT 2.0 Saxon-CE successfully loaded.");
+            document.getElementById("loader-msg").style.display = "none";
+            document.getElementById("project-form").style.display = "block";
+        }
+
         document.getElementById("file").addEventListener("change", function(evt) {
-            var fn = evt.target.files[0];
+            var projf = evt.target.files[0];
+            //
+            // Force a redraw to show the analyzing in progress message. In order
+            // to force the redraw, we need to query a (document) property that
+            // needs to enforce layout calculation after un-hiding the progress
+            // message.
+            //
+            document.getElementById("analyzing-msg").style.display = "block";
+            var foo = document.offsetHeight; // force redraw due to recalculation
+
+            console.log("Retrieving project document \"" + projf.name + "\".");
             var xmlfr = new FileReader();
-            xmlfr.onload = function(evt) {
-                var dp = new DOMParser();
-                // ugly hack for broken Kdenlive project XML that isn't valid... :(
-                var kdenlive = evt.target.result.replace(/<mlt\s(.*)>/, "<mlt xmlns:kdenlive=\"http://www.kdenlive.org/namespace/borked\" $1>");
-                var xml = dp.parseFromString(kdenlive, "application/xml");
-                var xsltr = new XMLHttpRequest();
-                xsltr.open("GET", "kdenlive-project-analyzer.xsl", false);
-                xsltr.send(null);
-                var xslt = xsltr.responseXML;
-                //var xsltp = new XSLTProcessor();
-                var xsltp = new Saxon.newXSLT20Processor(xslt);
-                //xsltp.importStylesheet(xslt);
-                var analysis = xsltp.transformToFragment(xml, document);
-                document.getElementById("disection").innerHTML = "";
-                document.getElementById("disection").appendChild(analysis);
+            xmlfr.onerror = function(evt) {
+                //
+                // Project file could not be retrieved. So hide the progress
+                // message and produce an error message.
+                //
+                console.log("Failed to retrieve project document: ",
+                            evt.target.error.name);
+                document.getElementById("analyzing-msg").style.display = "none";
+                document.getElementById("analysis-report").innerHTML = "";
+                document.getElementById("analysis-report").innerHTML =
+                    "<p><b>Error:</b> cannot retrieve Kdenlive project document; reason: "
+                    + evt.target.error.name
+                    + "</p>";
             };
-            xmlfr.readAsText(fn);
+            xmlfr.onload = function(evt) {
+                console.log("Project document retrieved.");
+                try {
+                    //
+                    // This is an ugly hack due to the broken Kdenlive project XML
+                    // that isn't valid, so any half-decent XML parser chokes on it.
+                    // As it is, the XSLT transformation engines will choke, so we
+                    // sneak in a fake kdenlive namespace declaration in order to
+                    // make Kdenlive project documents become valid XML.
+                    //
+                    var kdenlive = evt.target.result.replace(/<mlt\s(.*)>/, "<mlt xmlns:kdenlive=\"http://www.kdenlive.org/namespace/borked\" $1>");
+
+                    var dp = new DOMParser();
+                    var xml = dp.parseFromString(kdenlive, "application/xml");
+
+                    var xsltr = new XMLHttpRequest();
+                    xsltr.open("GET", "kdenlive-project-analyzer.xsl", false);
+                    xsltr.send(null);
+                    var xslt = xsltr.responseXML;
+
+                    //
+                    // Now run the analysis script.
+                    //
+                    console.log("Starting project document analysis.");
+                    var xsltp = new Saxon.newXSLT20Processor(xslt);
+                    xsltp.setParameter(null, "project-name", projf.name);
+                    var analysis = xsltp.transformToFragment(xml, document);
+                    console.log("Analysis finished.");
+
+                    //
+                    // Hide the analyzing in progress message after we've finished.
+                    // Also hide the form; user can get the form back by simply
+                    // reloading this page.
+                    //
+                    document.getElementById("analyzing-msg").style.display = "none";
+                    document.getElementById("project-form").style.display = "none";
+                    //
+                    // Copy the analysis report into the HTML document for display.
+                    // Make sure to remove any old, stale report.
+                    //
+                    document.getElementById("analysis-report").innerHTML = "";
+                    document.getElementById("analysis-report").appendChild(
+                        analysis.getElementById("report"));
+                } catch ( e ) {
+                    //
+                    // Ooops, this didn't work out as expected...
+                    //
+                    console.log("Analysis aborted: " + e.message);
+                    document.getElementById("analyzing-msg").style.display = "none";
+                    document.getElementById("analysis-report").innerHTML = "";
+                    document.getElementById("analysis-report").innerHTML =
+                        "<p><b>Error:</b> Kdenlive project analysis aborted, reasons: "
+                        + e.message
+                        + "</p>";
+                }
+            };
+            xmlfr.readAsText(projf);
         }, false)
     </script>
 </html>

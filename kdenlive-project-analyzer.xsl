@@ -31,8 +31,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.9.6
-                                         '"/>
+    <xsl:variable name="version" select="'0.9.8'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -42,57 +41,17 @@
     <xsl:key name="clipkey" match="producer" use="substring(concat(replace(property[@name='resource'],'.*/',''),property[@name='kdenlive:clipname']),1,1)"/>
 
 
-    <xsl:include href="kpa-main.xsl"/>
+    <!-- Parameters to this XSLT stylesheet -->
+    <xsl:param name="project-name"/><!-- project URI/file name -->
 
+
+    <!-- Pull in all the required modules -->
+    <xsl:include href="kpa-utils.xsl"/>
+    <xsl:include href="kpa-timeline-utils.xsl"/>
+    <xsl:include href="kpa-main.xsl"/>
     <xsl:include href="kpa-project-information.xsl"/>
     <xsl:include href="kpa-project-statistics.xsl"/>
 
-
-    <!-- Render a description with a value/selector in form of a table row
-         consisting of exactly two columns: left col for description, right
-         col for value.
-
-         Parameters:
-         * description: text to output in left cell.
-         * text: optional/preferred, the value to output in right cell.
-         * copy: optional, the node set to copy into the right cell.
-      -->
-    <xsl:template name="show-description-with-value">
-        <xsl:param name="description"/>
-        <xsl:param name="description-copy"/>
-        <xsl:param name="text"/>
-        <xsl:param name="copy"/>
-        <tr>
-            <td>
-                <xsl:choose>
-                    <xsl:when test="$description"><xsl:value-of select="$description"/></xsl:when>
-                    <xsl:otherwise><xsl:copy-of select="$description-copy"/></xsl:otherwise>
-                </xsl:choose>
-                </td>
-            <td>
-                <xsl:choose>
-                    <xsl:when test="$text"><xsl:value-of select="$text"/></xsl:when>
-                    <xsl:otherwise><xsl:copy-of select="$copy"/></xsl:otherwise>
-                </xsl:choose>
-            </td>
-        </tr>
-    </xsl:template>
-
-
-    <!-- Gather all timeline tracks, and some associated information. This
-         later helps us avoiding using the same XPath code over and over
-         again, with some subtle bugs between different instances...
-      -->
-    <xsl:variable name="timeline-tracks" select="/mlt/tractor[@id='maintractor']/track"/>
-    <xsl:variable name="num-timeline-tracks" select="count($timeline-tracks)"/>
-    <xsl:variable name="num-timeline-user-tracks" select="$num-timeline-tracks -1"/>
-
-    <!-- Type-specific timeline tracks -->
-    <xsl:variable name="timeline-av-tracks" select="/mlt/playlist[boolean(property[@name='kdenlive:track_name']) and not(property[@name='kdenlive:audio_track'] = '1')]"/>
-    <xsl:variable name="num-timeline-av-tracks" select="count($timeline-av-tracks)"/>
-
-    <xsl:variable name="timeline-audio-tracks" select="/mlt/playlist[boolean(property[@name='kdenlive:track_name']) and (property[@name='kdenlive:audio_track'] = '1')]"/>
-    <xsl:variable name="num-timeline-audio-tracks" select="count($timeline-audio-tracks)"/>
 
 
     <!-- Gather all project bin folders -->
@@ -246,58 +205,6 @@
     </xsl:template>
 
 
-    <!-- Heuristics for finding out flavor of transparent tracks are used in
-         a Kdenlive project.
-
-         Please note that for old track-wise projects the compositing transitions
-         are only present for the tracks for which automatic compositing is enabled,
-         that is, only for "transparent tracks".
-
-         These heuristics may totally mess up when the internally added
-         transitions are totally messed up. No wonder.
-
-         Possible values are:
-         * none: no suitable information about compositing found
-         * track: old track-wise controllable compositing
-         * preview: new timeline-wise preview-quality compositing
-         * hq: new timeline-wise high-quality compositing
-      -->
-    <xsl:variable name="timeline-compositing-mode">
-        <xsl:choose>
-            <xsl:when test="$num-internally-added-compositing-transitions &gt; 0">
-                <xsl:variable name="compositor-type" select="$internally-added-compositing-transitions[1]/property[@name='mlt_service']/text()"/>
-                <xsl:choose>
-                    <xsl:when test="$compositor-type = 'qtblend'">hq</xsl:when>
-                    <xsl:when test="$compositor-type = 'composite'">preview</xsl:when>
-                    <xsl:when test="$compositor-type = 'frei0r.cairoblend'">track</xsl:when>
-                    <xsl:otherwise>track</xsl:otherwise>
-                </xsl:choose>
-            </xsl:when>
-            <xsl:otherwise>none</xsl:otherwise>
-        </xsl:choose>
-    </xsl:variable>
-
-
-    <!-- Show a short notice about the (assumed) timeline compositing mode.
-      -->
-    <xsl:template name="timeline-compositing-info">
-        <p>The timeline track compositing is
-            <xsl:choose>
-                <xsl:when test="$timeline-compositing-mode = 'none'">
-                    completely <i>off</i>.
-                </xsl:when>
-                <xsl:when test="$timeline-compositing-mode = 'track'">
-                    (old) <i>track-wise</i> controllable.
-                </xsl:when>
-                <xsl:when test="$timeline-compositing-mode = 'preview'">
-                    <i>preview quality</i>.
-                </xsl:when>
-                <xsl:when test="$timeline-compositing-mode = 'hq'">
-                    <i>high quality</i>.
-                </xsl:when>
-            </xsl:choose>
-        </p>
-    </xsl:template>
 
 
     <!-- Show transparent track state icon -->
@@ -326,7 +233,7 @@
             <xsl:call-template name="error-icon"/>&#160;The hidden built-in internal "Black" track is missing.
         </xsl:if>
 
-        <xsl:call-template name="timeline-compositing-info"/>
+        <xsl:call-template name="show-timeline-compositing-info"/>
 
         <p><xsl:value-of select="$num-timeline-user-tracks"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span> timeline tracks:</p>
         <ul class="tracks">
@@ -359,7 +266,11 @@
                 <xsl:with-param name="frames">
                     <xsl:value-of select="$timeline-len"/>
                 </xsl:with-param>
-            </xsl:call-template>. <span class="anno">(<i>Please note that for projects edited with Kdenlive 16.07.xx, 16.08, or later, the hidden built-in "Black" track is always one frame longer than the overall timeline length. The calculation of the overall timeline length is only taking user-visible timeline tracks into the overall length calculation. For older projects, the length of the "Black" tracks equals that of the overall timeline length.</i>)</span>
+            </xsl:call-template>.
+        </p>
+
+        <p class="anno">
+            (<i>Please note that for projects edited with Kdenlive 16.07.xx, 16.08, or later, the hidden built-in "Black" track is always one frame longer than the overall timeline length. The calculation of the overall timeline length is only taking user-visible timeline tracks into the overall length calculation. For older projects, the length of the "Black" tracks equals that of the overall timeline length.</i>)
         </p>
 
         <xsl:if test="($timeline-len != $black-track-len) and ($timeline-len != ($black-track-len - 1))">
@@ -786,7 +697,7 @@
         </span>
 
         <!-- internal information -->
-        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track-ref"/>", MLT track index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
+        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track-ref"/>", index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
     </xsl:template>
 
 
