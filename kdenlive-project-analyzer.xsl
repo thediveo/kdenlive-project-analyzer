@@ -31,8 +31,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.9.6
-                                         '"/>
+    <xsl:variable name="version" select="'0.9.7'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -42,41 +41,16 @@
     <xsl:key name="clipkey" match="producer" use="substring(concat(replace(property[@name='resource'],'.*/',''),property[@name='kdenlive:clipname']),1,1)"/>
 
 
-    <xsl:include href="kpa-main.xsl"/>
+    <!-- Parameters to this XSLT stylesheet -->
+    <xsl:param name="project-name"/><!-- project URI/file name -->
 
+
+    <!-- Pull in all the required modules -->
+    <xsl:include href="kpa-utils.xsl"/>
+    <xsl:include href="kpa-main.xsl"/>
     <xsl:include href="kpa-project-information.xsl"/>
     <xsl:include href="kpa-project-statistics.xsl"/>
 
-
-    <!-- Render a description with a value/selector in form of a table row
-         consisting of exactly two columns: left col for description, right
-         col for value.
-
-         Parameters:
-         * description: text to output in left cell.
-         * text: optional/preferred, the value to output in right cell.
-         * copy: optional, the node set to copy into the right cell.
-      -->
-    <xsl:template name="show-description-with-value">
-        <xsl:param name="description"/>
-        <xsl:param name="description-copy"/>
-        <xsl:param name="text"/>
-        <xsl:param name="copy"/>
-        <tr>
-            <td>
-                <xsl:choose>
-                    <xsl:when test="$description"><xsl:value-of select="$description"/></xsl:when>
-                    <xsl:otherwise><xsl:copy-of select="$description-copy"/></xsl:otherwise>
-                </xsl:choose>
-                </td>
-            <td>
-                <xsl:choose>
-                    <xsl:when test="$text"><xsl:value-of select="$text"/></xsl:when>
-                    <xsl:otherwise><xsl:copy-of select="$copy"/></xsl:otherwise>
-                </xsl:choose>
-            </td>
-        </tr>
-    </xsl:template>
 
 
     <!-- Gather all timeline tracks, and some associated information. This

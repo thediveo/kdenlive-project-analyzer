@@ -35,26 +35,28 @@
                 <link rel="stylesheet" href="kdenlive-project-analyzer.css"/>
             </head>
             <body>
-                <h1><img src="64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
+                <div id="report">
+                    <h1><img src="64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
 
-                <p class="anno">Analysis script version: <xsl:value-of select="$version"/> / (c) 2016 Harald Albrecht / <a href="https://thediveo.github.io/kdenlive-project-analyzer/kdenlive-project-analyzer.html">Online</a> / <a href="https://thediveo.github.io/kdenlive-project-analyzer/">Project on GitHub</a></p>
+                    <p class="anno">Analysis script version: <xsl:value-of select="$version"/> / (c) 2016 Harald Albrecht / <a href="https://thediveo.github.io/kdenlive-project-analyzer/kdenlive-project-analyzer.html">Online</a> / <a href="https://thediveo.github.io/kdenlive-project-analyzer/">Project on GitHub</a></p>
 
-                <!-- Sanity checks -->
-                <!-- Not even remotely a Kdenlive project... -->
-                <xsl:choose>
-                    <xsl:when test="count(/mlt)!=1">
-                        <p><b class="error">Error:</b> this is not a valid Kdenlive/MLT project; <xsl:value-of select="count(/mlt)"/> &lt;mlt&gt; element(s) found.</p>
-                    </xsl:when>
-                    <xsl:when test="/mlt/@producer!='main bin'">
-                        <p><b class="error">Error:</b> this is not a valid Kdenlive project (MLT producer missing/invalid).</p>
-                    </xsl:when>
-                    <xsl:when test="number(/mlt/playlist[@id='main bin']/property[@name='kdenlive:docproperties.version'])&lt;0.91">
-                        <p><b class="error">Error:</b> unsupported old Kdenlive project document version "<xsl:value-of select="/mlt/playlist[@id='main bin']/property[@name='kdenlive:docproperties.version']"/>"; can only analyze document from version 0.91 on and later.</p>
-                    </xsl:when>
-                    <xsl:otherwise>
-                        <xsl:call-template name="analyze-kdenlive-project"/>
-                    </xsl:otherwise>
-                </xsl:choose>
+                    <!-- Sanity checks -->
+                    <!-- Not even remotely a Kdenlive project... -->
+                    <xsl:choose>
+                        <xsl:when test="count(/mlt)!=1">
+                            <p><b class="error">Error:</b> this is not a valid Kdenlive/MLT project; <xsl:value-of select="count(/mlt)"/> &lt;mlt&gt; element(s) found.</p>
+                        </xsl:when>
+                        <xsl:when test="/mlt/@producer!='main bin'">
+                            <p><b class="error">Error:</b> this is not a valid Kdenlive project (MLT producer missing/invalid).</p>
+                        </xsl:when>
+                        <xsl:when test="number(/mlt/playlist[@id='main bin']/property[@name='kdenlive:docproperties.version'])&lt;0.91">
+                            <p><b class="error">Error:</b> unsupported old Kdenlive project document version "<xsl:value-of select="/mlt/playlist[@id='main bin']/property[@name='kdenlive:docproperties.version']"/>"; can only analyze document from version 0.91 on and later.</p>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:call-template name="analyze-kdenlive-project"/>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </div>
             </body>
         </html>
     </xsl:template>
