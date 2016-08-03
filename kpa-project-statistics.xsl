@@ -97,12 +97,12 @@
                     <xsl:with-param name="copy"><xsl:value-of select="$num-internally-added-transitions"/> &#215; <xsl:call-template name="transition-icon"/></xsl:with-param>
                 </xsl:call-template>
                 <xsl:call-template name="show-description-with-value">
-                    <xsl:with-param name="description">&#8230; audio mixers:</xsl:with-param>
-                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
-                </xsl:call-template>
-                <xsl:call-template name="show-description-with-value">
                     <xsl:with-param name="description">&#8230; video compositors:</xsl:with-param>
                     <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-internally-added-compositing-transitions"/> &#215; <xsl:call-template name="video-track-icon"/></xsl:with-param>
+                </xsl:call-template>
+                <xsl:call-template name="show-description-with-value">
+                    <xsl:with-param name="description">&#8230; audio mixers:</xsl:with-param>
+                    <xsl:with-param name="copy">&#8230; <xsl:value-of select="$num-internally-added-mix-transitions"/> &#215; <xsl:call-template name="audio-track-icon"/></xsl:with-param>
                 </xsl:call-template>
            </tbody>
         </table>

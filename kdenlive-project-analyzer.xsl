@@ -266,7 +266,11 @@
                 <xsl:with-param name="frames">
                     <xsl:value-of select="$timeline-len"/>
                 </xsl:with-param>
-            </xsl:call-template>. <span class="anno">(<i>Please note that for projects edited with Kdenlive 16.07.xx, 16.08, or later, the hidden built-in "Black" track is always one frame longer than the overall timeline length. The calculation of the overall timeline length is only taking user-visible timeline tracks into the overall length calculation. For older projects, the length of the "Black" tracks equals that of the overall timeline length.</i>)</span>
+            </xsl:call-template>.
+        </p>
+
+        <p class="anno">
+            (<i>Please note that for projects edited with Kdenlive 16.07.xx, 16.08, or later, the hidden built-in "Black" track is always one frame longer than the overall timeline length. The calculation of the overall timeline length is only taking user-visible timeline tracks into the overall length calculation. For older projects, the length of the "Black" tracks equals that of the overall timeline length.</i>)
         </p>
 
         <xsl:if test="($timeline-len != $black-track-len) and ($timeline-len != ($black-track-len - 1))">
@@ -693,7 +697,7 @@
         </span>
 
         <!-- internal information -->
-        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track-ref"/>", MLT track index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
+        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track-ref"/>", index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
     </xsl:template>
 
 
