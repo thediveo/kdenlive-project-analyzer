@@ -29,7 +29,7 @@
 
         <p>For automatic video track compositing, Kdenlives creates the following compositing transitions automatically behind the scenes.</p>
 
-        <xsl:call-template name="timeline-compositing-info"/>
+        <xsl:call-template name="show-timeline-compositing-info"/>
 
         <!-- Sanity check to quickly identify slightly insane Kdenlive projects -->
         <xsl:if test="not($timeline-compositing-mode = 'none') and ($num-timeline-av-tracks &lt; $num-internally-added-compositing-transitions)">
