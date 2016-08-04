@@ -61,7 +61,8 @@
             // message.
             //
             document.getElementById("analyzing-msg").style.display = "block";
-            var foo = document.offsetHeight; // force redraw due to recalculation
+            // force redraw due to recalculation
+            var foo = document.getElementById("analyzing-msg").offsetHeight;
 
             console.log("Retrieving project document \"" + projf.name + "\".");
             var xmlfr = new FileReader();
