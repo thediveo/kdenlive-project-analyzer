@@ -23,8 +23,13 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 
-    <!-- Gather all user-created transitions -->
-    <xsl:variable name="user-transitions" select="/mlt/tractor[@id='maintractor']/transition[not(property[@name='internal_added']/text()='237')]"/>
+<!-- Useful variables related to transitions -->
+
+    <!-- All user-created transitions, regardless of track. This node set
+         excludes the so-called internally-added transition that Kdenlive
+         sets up for automatic audio mixing and track compositing.
+      -->
+    <xsl:variable name="user-transitions" select="$main-tractor/transition[not(property[@name='internal_added'] = '237')]"/>
     <xsl:variable name="num-user-transitions" select="count($user-transitions)"/>
 
 
@@ -41,6 +46,34 @@
     <!-- Gather all internally added video compositing transitions -->
     <xsl:variable name="internally-added-compositing-transitions" select="/mlt/tractor[@id='maintractor']/transition[property[@name='internal_added']/text()='237'][not(property[@name='mlt_service']/text()='mix')]"/>
     <xsl:variable name="num-internally-added-compositing-transitions" select="count($internally-added-compositing-transitions)"/>
+
+
+    <!-- Calculate the latest out point of the latest transition for
+         a given timeline track. For this, we assume the Kdenlive model
+         for transitions, where a transitions "belongs" to the B track
+         referenced by a given transition.
+
+         This template can be used to calculate the overall length of
+         a particular track, or even the overall timeline length.
+
+         Parameters:
+         * mlt-track-idx: the (MLT) track index of the track for which
+             to calculate the latest transition out point.
+      -->
+    <xsl:template name="calc-track-transitions-end">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="user-transitions" select="/mlt/tractor[@id='maintractor']/transition[not(property[@name='internal_added']) and property[@name='b_track'] = $mlt-track-idx]"/>
+
+        <xsl:choose>
+            <xsl:when test="count($user-transitions) = 0">
+                0
+            </xsl:when>
+            <xsl:otherwise>
+                <xsl:value-of select="max($user-transitions/@out)"/>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
 
 
 </xsl:stylesheet>

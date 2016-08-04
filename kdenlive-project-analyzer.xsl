@@ -46,6 +46,7 @@
 
 
     <!-- Pull in all the required modules -->
+    <xsl:include href="kpa-maintractor.xsl"/>
     <xsl:include href="kpa-icons.xsl"/>
     <xsl:include href="kpa-utils.xsl"/>
     <xsl:include href="kpa-timeline-utils.xsl"/>
@@ -61,21 +62,6 @@
 
 
 
-    <!-- ### -->
-    <xsl:template name="calc-track-transitions-end">
-        <xsl:param name="mlt-track-idx"/>
-
-        <xsl:variable name="user-transitions" select="/mlt/tractor[@id='maintractor']/transition[not(property[@name='internal_added']) and property[@name='b_track'] = $mlt-track-idx]"/>
-
-        <xsl:choose>
-            <xsl:when test="count($user-transitions) = 0">
-                0
-            </xsl:when>
-            <xsl:otherwise>
-                <xsl:value-of select="max($user-transitions/@out)"/>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
 
 
     <xsl:template name="show-track-transitions-end">
