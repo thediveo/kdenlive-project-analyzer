@@ -184,4 +184,89 @@
     </xsl:template>
 
 
+    <!-- List all the (timeline) tracks that are defined in this Kdenlive project.
+         We list/show the tracks in the usual Kdenlive timeline layout, that is,
+         from the topmost track down to the bottommost track, in this order. On
+         purpose, we list *all* tracks, including the built-in and hidden "Black"
+         track that Kdenlive automatically includes with each project.
+      -->
+    <xsl:template name="list-all-tracks">
+        <!-- Kdenlive's tracks are referenced as <tracks> elements inside the
+             main <tractor> with id "maintractor". However, the Kdenlive
+             tracks themselves are then represented as <playlists>. -->
+        <xsl:if test="count(/mlt/playlist[@id='black_track']) != 1">
+            <xsl:call-template name="error-icon"/>&#160;The hidden built-in internal "Black" track is missing.
+        </xsl:if>
+
+        <xsl:call-template name="show-timeline-compositing-info"/>
+
+        <p><xsl:value-of select="$num-timeline-user-tracks"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span> timeline tracks:</p>
+        <ul class="tracks">
+            <xsl:for-each select="$timeline-tracks">
+                <!-- We only need this loop for counting MLT track indices...! -->
+                <li>
+                    <xsl:call-template name="show-track-info">
+                        <xsl:with-param name="mlt-track-idx" select="$num-timeline-tracks - position()"/>
+                    </xsl:call-template>
+                </li>
+            </xsl:for-each>
+        </ul>
+
+        <!-- Check the hidden built-in black track #0 to match the overall
+             timeline length as calculated on the basis of all user tracks,
+             with indices from #1 on.
+          -->
+        <xsl:variable name="black-track-len">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="0"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="timeline-len">
+            <xsl:call-template name="max-timeline-length"/>
+        </xsl:variable>
+
+        <p>
+            The overall timeline length is
+            <xsl:call-template name="show-timecode">
+                <xsl:with-param name="frames">
+                    <xsl:value-of select="$timeline-len"/>
+                </xsl:with-param>
+            </xsl:call-template>.
+        </p>
+
+        <p class="anno">
+            (<i>Please note that for projects edited with Kdenlive 16.07.xx, 16.08, or later, the hidden built-in "Black" track is always one frame longer than the overall timeline length. The calculation of the overall timeline length is only taking user-visible timeline tracks into the overall length calculation. For older projects, the length of the "Black" tracks equals that of the overall timeline length.</i>)
+        </p>
+
+        <xsl:if test="($timeline-len != $black-track-len) and ($timeline-len != ($black-track-len - 1))">
+            <xsl:call-template name="error-icon"/>&#160;
+            <span class="error">
+                Error: the hidden built-in "Black" track (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$black-track-len"/></xsl:call-template>) is
+                <xsl:choose>
+                    <!-- The black track actually seems to be always one frame longer
+                         than the overall timeline length; probably so users can
+                         add or insert clips at the end after the last clip?
+                      -->
+                    <xsl:when test="$timeline-len &gt; ($black-track-len - 1)">
+                        shorter
+                    </xsl:when>
+                    <xsl:otherwise>
+                        longer
+                    </xsl:otherwise>
+                </xsl:choose>
+                than the overall timeline length (<xsl:call-template name="show-timecode"><xsl:with-param name="frames" select="$timeline-len"/></xsl:call-template>)!
+            </span>
+        </xsl:if>
+
+        <p>
+            The bottommost <i>video</i> track is track
+            "<xsl:call-template name="show-track-title">
+                <xsl:with-param name="mlt-track-idx" select="$timeline-lowest-video-track"/>
+                <xsl:with-param name="class" select="''"/>
+            </xsl:call-template>"
+            <span class="anno">(<i>MLT track index: <xsl:value-of select="$timeline-lowest-video-track"/></i>)</span>
+        </p>
+    </xsl:template>
+
+
 </xsl:stylesheet>
