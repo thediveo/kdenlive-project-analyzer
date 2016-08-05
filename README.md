@@ -24,7 +24,7 @@ your web browser, we and GitHub won't ever see your precious projects. The analy
 # Local Installation
 
 There is no specific installation; simply download/clone this project into its own directory. Then please install
-the the `Saxonce` folder from the [Saxon-CE XSLT 2.0 distribution](http://www.saxonica.com/ce/index.xml) into your local Kdenlive Project Analyzer copy (keeping the `Saxonce` folder). That's all.
+the `Saxonce` folder from the [Saxon-CE XSLT 2.0 distribution](http://www.saxonica.com/ce/index.xml) into your local Kdenlive Project Analyzer copy (keeping the `Saxonce` folder). That's all.
 
 # Starting the Analyzer
 
