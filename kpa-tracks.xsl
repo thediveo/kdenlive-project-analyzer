@@ -336,6 +336,10 @@
     </xsl:template>
 
 
+    <!-- Spacer for -->
+    <xsl:template name="show-track-state-spacer">
+        <span class="fix-fa"/>
+    </xsl:template>
 
 
     <!-- List all the (timeline) tracks that are defined in this Kdenlive project.
@@ -421,6 +425,82 @@
             <span class="anno">(<i>MLT track index: <xsl:value-of select="$timeline-lowest-video-track"/></i>)</span>
         </p>
     </xsl:template>
+
+
+    <!-- Calculate total length of a track in frames, based on clips -->
+    <xsl:template name="calc-track-length">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
+        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+        <xsl:variable name="clips" select="$track-playlist/entry"/>
+
+        <xsl:variable name="s" select="sum($track-playlist/blank/@length)"/>
+        <xsl:variable name="i" select="sum($clips/@in)"/>
+        <xsl:variable name="o" select="sum($clips/@out)"/>
+        <!-- clip/entry lengths are actually out-in+1, so we need to correct the
+             sums calculated from outs-ins...
+          -->
+        <xsl:variable name="c" select="count($clips)"/>
+        <xsl:value-of select="($o - $i) + $c + $s"/>
+    </xsl:template>
+
+
+    <!-- Render track properties, such as track type, name, hidden, locked, muted,
+         compositing, et cetera.
+
+         Parameters:
+         * track-idx: the 0-based (MLT) track index
+      -->
+    <xsl:template name="show-track-info">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
+        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+
+        <xsl:call-template name="show-track-icon">
+            <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+        </xsl:call-template>
+
+        <xsl:call-template name="show-track-title">
+            <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+        </xsl:call-template>
+
+        <span class="track-states">
+            <xsl:call-template name="show-track-state-locked">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-muted">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-hidden">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-transparent">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+
+            <xsl:call-template name="show-track-state-effects">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </span>
+
+        <!-- calculate total track length on the basis of clips and
+             transitions
+          -->
+        <span class="track-length">
+            <xsl:call-template name="track-total-length-timecode">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </span>
+
+        <!-- internal information -->
+        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track-ref"/>", index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
+    </xsl:template>
+
 
 
 </xsl:stylesheet>

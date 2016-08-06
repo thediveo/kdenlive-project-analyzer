@@ -62,4 +62,20 @@
     </xsl:template>
 
 
+    <!-- -->
+    <xsl:template name="show-timecode">
+        <xsl:param name="frames"/>
+
+        <xsl:variable name="fps" select="round(/mlt/profile/@frame_rate_num div /mlt/profile/@frame_rate_den)"/>
+
+        <xsl:variable name="ff" select="format-number($frames mod $fps, '00')"/>
+        <xsl:variable name="ss" select="format-number(floor($frames div $fps) mod 60, '00')"/>
+        <xsl:variable name="mm" select="format-number(floor(($frames div $fps) div 60) mod 60, '00')"/>
+        <xsl:variable name="hh" select="format-number(floor(($frames div $fps) div 3600), '00')"/>
+
+        <tt><xsl:value-of select="$hh"/>:<xsl:value-of select="$mm"/>:<xsl:value-of select="$ss"/>:<xsl:value-of select="$ff"/></tt>
+        <!--(<xsl:value-of select="$frames"/>)-->
+    </xsl:template>
+
+
 </xsl:stylesheet>

@@ -121,4 +121,83 @@
     </xsl:template>
 
 
+    <!-- recursive function for finding the first video track -->
+    <xsl:template name="find-lowest-video-track">
+        <xsl:param name="mlt-track-idx" select="1"/>
+
+        <xsl:if test="$mlt-track-idx &lt; $num-timeline-tracks">
+            <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+            <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+
+            <xsl:choose>
+                <!-- audio-only track? search on! -->
+                <xsl:when test="$track/property[@name='kdenlive:audio_track']">
+                    <xsl:call-template name="find-lowest-video-track">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx + 1"/>
+                    </xsl:call-template>
+                </xsl:when>
+                <!-- try next upper track -->
+                <xsl:otherwise><xsl:value-of select="$mlt-track-idx"/></xsl:otherwise>
+            </xsl:choose>
+        </xsl:if>
+    </xsl:template>
+
+
+    <xsl:variable name="timeline-lowest-video-track">
+        <xsl:call-template name="find-lowest-video-track"/>
+    </xsl:variable>
+
+
+    <xsl:template name="max-timeline-length">
+        <xsl:param name="mlt-track-idx" select="1"/>
+
+        <xsl:variable name="transitions-track-len">
+            <xsl:call-template name="calc-track-transitions-end">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:variable name="clips-track-len">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:variable name="len">
+            <xsl:choose>
+                <xsl:when test="$clips-track-len &gt;= $transitions-track-len">
+                    <xsl:value-of select="$clips-track-len"/>
+                </xsl:when>
+                <xsl:otherwise>
+                    <xsl:value-of select="$transitions-track-len"/>
+                </xsl:otherwise>
+            </xsl:choose>
+        </xsl:variable>
+
+        <xsl:choose>
+            <xsl:when test="$mlt-track-idx &lt; $num-timeline-tracks">
+                <xsl:variable name="maxlen">
+                    <xsl:call-template name="max-timeline-length">
+                        <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx + 1"/>
+                    </xsl:call-template>
+                </xsl:variable>
+                <xsl:choose>
+                    <xsl:when test="$maxlen > $len"><xsl:value-of select="$maxlen"/></xsl:when>
+                    <xsl:otherwise><xsl:value-of select="$len"/></xsl:otherwise>
+                </xsl:choose>
+            </xsl:when>
+            <xsl:otherwise><xsl:value-of select="$len"/></xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
+    <xsl:template name="show-timeline-length">
+        <xsl:call-template name="show-timecode">
+            <xsl:with-param name="frames">
+                <xsl:call-template name="max-timeline-length"/>
+            </xsl:with-param>
+        </xsl:call-template>
+    </xsl:template>
+
+
 </xsl:stylesheet>
