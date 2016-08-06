@@ -64,55 +64,6 @@
 
 
 
-    <xsl:template name="show-track-transitions-end">
-        <xsl:param name="mlt-track-idx"/>
-
-        <xsl:call-template name="show-timecode">
-            <xsl:with-param name="frames">
-                <xsl:call-template name="calc-track-transitions-end">
-                    <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
-                </xsl:call-template>
-            </xsl:with-param>
-        </xsl:call-template>
-    </xsl:template>
-
-
-    <xsl:template name="track-total-length-timecode">
-        <xsl:param name="mlt-track-idx"/>
-
-        <xsl:variable name="len-by-clip">
-            <xsl:call-template name="calc-track-length">
-                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
-            </xsl:call-template>
-        </xsl:variable>
-        <xsl:variable name="len-by-transition">
-            <xsl:call-template name="calc-track-transitions-end">
-                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
-            </xsl:call-template>
-        </xsl:variable>
-
-        <xsl:choose>
-            <xsl:when test="$len-by-clip &gt;= $len-by-transition">
-                <span title="track length, determinded by last clip">
-                    <xsl:call-template name="show-timecode">
-                        <xsl:with-param name="frames">
-                            <xsl:value-of select="$len-by-clip"/>
-                        </xsl:with-param>
-                    </xsl:call-template>
-                </span>
-            </xsl:when>
-            <xsl:otherwise>
-                <span title="track length, as determined by overhanging transition">
-                    <xsl:call-template name="show-timecode">
-                        <xsl:with-param name="frames">
-                            <xsl:value-of select="$len-by-transition"/>
-                        </xsl:with-param>
-                    </xsl:call-template>
-                </span>
-            </xsl:otherwise>
-        </xsl:choose>
-    </xsl:template>
-
 
 
 

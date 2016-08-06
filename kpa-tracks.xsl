@@ -20,29 +20,50 @@
      along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <xsl:stylesheet version="2.0"
-                xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+                xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                xmlns:kpa="http://kdenlive.org/kpa">
 
 
-    <!-- Show title of a track.
+    <!-- Show the title of a specific track, given only its (MLT) track index.
+
+         Parameters:
+         * mlt-track-idx: the (MLT) track index, where 0 is the black track.
+         * class: (optional) if set, the CSS class string to use for wrapping the
+             track title into an HTML span element. If left unspecified, then
+             the default is to use the CSS class "track-title".
       -->
     <xsl:template name="show-track-title">
         <xsl:param name="mlt-track-idx"/>
         <xsl:param name="class" select="'track-title'"/>
 
-        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
-        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+        <!-- Remember: MLT track indices are 0-based, while XPath indices instead
+             are 1-based!
+          -->
+        <xsl:variable name="track-id"
+                      select="$timeline-tracks[$mlt-track-idx + 1]/@producer"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id = $track-id]"/>
 
-        <!-- Watch the builtin nameless, but not @id-less "Black" track!
+        <!-- Watch the builtin nameless, but not @id-less, "Black" track: we need
+             to handle it separately, as it has no name. We thus give it our own
+             neat descriptive title.
           -->
         <xsl:choose>
-            <!-- a user named track -->
+            <!-- it's a user named track, which we detect by the presence of
+                 Kdenlive's tack_name property inside a track/playlist element.
+              -->
             <xsl:when test="$track/property[@name='kdenlive:track_name']">
-                <!-- The user-visible track name -->
+                <!-- Show the user-visible, and user-assigned track name -->
                 <span class="{$class}">
                     <b><xsl:value-of select="$track/property[@name='kdenlive:track_name']"/></b>
                 </span>
             </xsl:when>
-            <!-- an unnamed (internal) track -->
+            <!-- It's the unnamed (internal) track "black". We thus supply our
+                 own descriptive title in spite of a project-given track title.
+                 Ordinary Kdenlive users don't get to see this track in the
+                 timeline, but will notice it as the bottommost track than can
+                 be chosen as the "track" property of Kdenlive's transitions.
+              -->
             <xsl:otherwise>
                 <span class="{$class} anno"><i>hidden built-in "<b>Black</b>" track</i></span>
             </xsl:otherwise>
@@ -50,41 +71,74 @@
     </xsl:template>
 
 
-    <!-- -->
+    <!-- Show a track's lock/unlock state in form of an icon. The specific
+         icons to be used are defined in a separate module kpa-icons.xsl.
+
+         Parameters:
+          * mlt-track-idx: the (MLT) track index, where 0 is the black track.
+     -->
     <xsl:template name="show-track-state-locked">
         <xsl:param name="mlt-track-idx"/>
 
-        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
-        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+        <!-- Remember: MLT track indices are 0-based, while XPath indices instead
+             are 1-based!
+          -->
+        <xsl:variable name="track-id"
+                      select="$timeline-tracks[$mlt-track-idx + 1]/@producer"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id = $track-id]"/>
 
-        <!-- Locked? -->
+        <!-- Locked? This is decided on the basis of the Kdenlive-defined
+             "locked_track" property inside a track/playlist element.
+          -->
         <xsl:choose>
-            <xsl:when test="$track/property[@name='kdenlive:locked_track']=1">
-                <i class="fix-fa fa fa-lock anno-locked" aria-hidden="true" title="locked"/>&#160;
+            <xsl:when test="$track/property[@name='kdenlive:locked_track'] = '1'">
+                <i class="fix-fa fa fa-lock anno-locked" aria-hidden="true" title="locked"/>
             </xsl:when>
             <xsl:otherwise>
-                <i class="fix-fa fa fa-unlock anno-unlocked" aria-hidden="true" title="unlocked"/>&#160;
+                <i class="fix-fa fa fa-unlock anno-unlocked" aria-hidden="true" title="unlocked"/>
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
 
 
-    <!-- -->
+    <!-- Show a track's visible/hidden state in form of an icon. The specific
+         icons to be used are defined in a separate module kpa-icons.xsl.
+
+         Please note that we gracefully handle the situation where we are
+         dealing with an audio-only track: in this case, just a spacer is
+         output instead of a visible/hidden state icon.
+
+         Parameters:
+          * mlt-track-idx: the (MLT) track index, where 0 is the black track.
+    -->
     <xsl:template name="show-track-state-hidden">
         <xsl:param name="mlt-track-idx"/>
 
-        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+        <!-- Remember: MLT track indices are 0-based, while XPath indices instead
+             are 1-based!
+          -->
+        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx + 1]"/>
         <xsl:variable name="hide" select="$track-ref/@hide"/>
-        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id = $track-ref/@producer]"/>
 
         <!-- Hidden video? -->
         <xsl:choose>
+            <!-- The hidden/visible state does not apply to audio-only tracks.
+                 For audio-only tracks we simply output a spacer instead of any
+                 state icon.
+              -->
             <xsl:when test="$track/property[@name='kdenlive:audio_track']">
-                <!-- show spacer -->
+                <!-- show spacer with a fixed space instead of any icon -->
                 <span class="fix-fa">&#160;</span>
             </xsl:when>
+            <!-- So we're dealing with an audio/video track now... -->
             <xsl:otherwise>
                 <xsl:choose>
+                    <!-- MLT, and thus Kdenlive in turn, does not define separate
+                         hiding/muting attributes, but instead combines both into
+                         a single "hide" attribut. So we need to check for multiple
+                         combinations where video is hidden.
+                      -->
                     <xsl:when test="$hide='video' or $hide='both'">
                         <i class="fix-fa fa fa-eye-slash anno-hidden" aria-hidden="true" title="hidden"/>&#160;
                     </xsl:when>
@@ -97,17 +151,30 @@
     </xsl:template>
 
 
-    <!-- -->
+    <!-- Show a track's muted/audible state in form of an icon. The specific
+         icons to be used are defined in a separate module kpa-icons.xsl.
+
+         Parameters:
+          * mlt-track-idx: the (MLT) track index, where 0 is the black track.
+    -->
     <xsl:template name="show-track-state-muted">
         <xsl:param name="mlt-track-idx"/>
 
-        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
+         <!-- Remember: MLT track indices are 0-based, while XPath indices instead
+             are 1-based!
+          -->
+       <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
         <xsl:variable name="hide" select="$track-ref/@hide"/>
         <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
 
         <!-- Muted? -->
         <xsl:choose>
-            <xsl:when test="$hide='audio' or $hide='both'">
+          <!-- MLT, and thus Kdenlive in turn, does not define separate
+             hiding/muting attributes, but instead combines both into
+             a single "hide" attribut. So we need to check for multiple
+             combinations where audio is muted.
+          -->
+          <xsl:when test="$hide='audio' or $hide='both'">
                 <span class="fix-fa anno-muted" aria-hidden="true" title="muted"><i class="fa fa-volume-off"/>&#215;</span>&#160;
             </xsl:when>
             <xsl:otherwise>
@@ -117,20 +184,55 @@
     </xsl:template>
 
 
-    <!-- -->
+    <!-- Show a track's compositing state (transparent/opaque) in form of
+         an icon. The specific icons to be used are defined in a separate
+         module kpa-icons.xsl.
+
+         Parameters:
+          * mlt-track-idx: the (MLT) track index, where 0 is the black track.
+          * class: (optional) if set, the CSS class string to use for wrapping the
+             compositing state indication into an HTML span element. If left
+             unspecified, then the default is to use the CSS class "fix-fa".
+   -->
     <xsl:template name="show-track-state-transparent">
         <xsl:param name="mlt-track-idx"/>
         <xsl:param name="class" select="fix-fa"/>
 
-        <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
-        <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
+        <!-- Remember: MLT track indices are 0-based, while XPath indices instead
+             are 1-based!
+          -->
+        <xsl:variable name="track-id"
+                      select="$timeline-tracks[$mlt-track-idx + 1]/@producer"/>
+        <xsl:variable name="track" select="/mlt/playlist[@id = $track-id]"/>
 
        <!-- Video track compositing? -->
         <xsl:choose>
+            <!-- In case of audio-only tracks we simply output a spacer instead
+                 of a compositing state icon.
+              -->
             <xsl:when test="$track/property[@name='kdenlive:audio_track']">
                 <!-- show spacer -->
                 <span class="{$class}">&#160;</span>
             </xsl:when>
+            <!-- We're dealing with an audio/video track. The difficult part now
+                 is that Kdenlive over time had different ways of how transparent
+                 tracks are configured/signalled. We basically today have:
+                 1. no track transparency at all - this is to be assumed whenever
+                    we don't find any internally added compositing transitions in
+                    the main tractor.
+                    a. pre 15.08 or so.
+                    b. 16.08+ with timeline compositing set to "none".
+                 2. track-wise transparency (15.08 to 16.04) - this can be easily
+                    detected through Kdenlive-specific "composite" properties inside
+                    the track/playlist elements.
+                 3. timeline compositing (16.04+) - this can be detected from the
+                    type of internally added compositing transitions used, as well as
+                    from the absence of any Kdenlive-specific track-wise "composite"
+                    properties inside the track/playlist elements. There are currently
+                    these two qualities for timeline compositing available:
+                    a. "preview" mode
+                    b. "high quality" mode
+              -->
             <xsl:otherwise>
                 <xsl:choose>
                     <!-- this project seems to use old track-wise compositing -->
@@ -182,6 +284,58 @@
             </xsl:otherwise>
         </xsl:choose>
     </xsl:template>
+
+
+    <xsl:template name="show-track-transitions-end">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:call-template name="show-timecode">
+            <xsl:with-param name="frames">
+                <xsl:call-template name="calc-track-transitions-end">
+                    <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+                </xsl:call-template>
+            </xsl:with-param>
+        </xsl:call-template>
+    </xsl:template>
+
+
+    <xsl:template name="track-total-length-timecode">
+        <xsl:param name="mlt-track-idx"/>
+
+        <xsl:variable name="len-by-clip">
+            <xsl:call-template name="calc-track-length">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+        <xsl:variable name="len-by-transition">
+            <xsl:call-template name="calc-track-transitions-end">
+                <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
+            </xsl:call-template>
+        </xsl:variable>
+
+        <xsl:choose>
+            <xsl:when test="$len-by-clip &gt;= $len-by-transition">
+                <span title="track length, determinded by last clip">
+                    <xsl:call-template name="show-timecode">
+                        <xsl:with-param name="frames">
+                            <xsl:value-of select="$len-by-clip"/>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </span>
+            </xsl:when>
+            <xsl:otherwise>
+                <span title="track length, as determined by overhanging transition">
+                    <xsl:call-template name="show-timecode">
+                        <xsl:with-param name="frames">
+                            <xsl:value-of select="$len-by-transition"/>
+                        </xsl:with-param>
+                    </xsl:call-template>
+                </span>
+            </xsl:otherwise>
+        </xsl:choose>
+    </xsl:template>
+
+
 
 
     <!-- List all the (timeline) tracks that are defined in this Kdenlive project.
