@@ -21,7 +21,7 @@
         <title>Kdenlive Project Analyzer</title>
 
         <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css"/>
-        <link rel="stylesheet" href="kdenlive-project-analyzer.css"/>
+        <link rel="stylesheet" href="style/kdenlive-project-analyzer.css"/>
 
         <script type="text/javascript" language="javascript" src="Saxonce/Saxonce.nocache.js"></script>
     </head>
@@ -34,7 +34,8 @@
             <p><i class="fa fa-file-text-o">&#160;</i><input type="file" name="file" id="file" accept=".kdenlive"></input></p>
         </form>
         <p id="analyzing-msg" style="display: none;">
-            <i class="fa fa-spinner fa-pulse fa-fw"></i>&#160;Analyzing your Kdenlive project, please wait...
+            <i class="fa fa-spinner fa-pulse fa-fw"></i>&#160;Analyzing your Kdenlive project, please wait.
+            <span id="progress-msg">...</span>
         </p>
 
         <div id="analysis-report"></div>
@@ -48,6 +49,14 @@
         //
         onSaxonLoad = function() {
             console.log("XSLT 2.0 Saxon-CE successfully loaded.");
+            Saxon.setLogLevel("INFO");
+            Saxon.setErrorHandler(function(e) {
+                // called with all kind of error and logging messages...
+                if ( e.message.includes("KPA:") ) {
+                    document.getElementById("progress-msg").innerHTML =
+                        e.message.replace(/.*\n.*KPA:\s*/, "");
+                }
+            });
             document.getElementById("loader-msg").style.display = "none";
             document.getElementById("project-form").style.display = "block";
         }
@@ -62,7 +71,9 @@
             //
             document.getElementById("analyzing-msg").style.display = "block";
             // force redraw due to recalculation
-            var foo = document.getElementById("analyzing-msg").offsetHeight;
+            setTimeout(function() {
+                document.getElementById("analyzing-msg").height;
+            }, 0);
 
             console.log("Retrieving project document \"" + projf.name + "\".");
             var xmlfr = new FileReader();
@@ -96,7 +107,7 @@
                     var xml = dp.parseFromString(kdenlive, "application/xml");
 
                     var xsltr = new XMLHttpRequest();
-                    xsltr.open("GET", "kdenlive-project-analyzer.xsl", false);
+                    xsltr.open("GET", "kpa/kpa.xsl", false);
                     xsltr.send(null);
                     var xslt = xsltr.responseXML;
 
@@ -116,6 +127,7 @@
                     //
                     document.getElementById("analyzing-msg").style.display = "none";
                     document.getElementById("project-form").style.display = "none";
+                    document.getElementById("progress-msg").innerHTML = "";
                     //
                     // Copy the analysis report into the HTML document for display.
                     // Make sure to remove any old, stale report.
@@ -129,6 +141,7 @@
                     //
                     console.log("Analysis aborted: " + e.message);
                     document.getElementById("analyzing-msg").style.display = "none";
+                    document.getElementById("progress-msg").innerHTML = "";
                     document.getElementById("analysis-report").innerHTML = "";
                     document.getElementById("analysis-report").innerHTML =
                         "<p><b>Error:</b> Kdenlive project analysis aborted, reasons: "

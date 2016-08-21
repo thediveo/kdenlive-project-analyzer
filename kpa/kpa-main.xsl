@@ -27,16 +27,17 @@
          the MLT XML document
       -->
     <xsl:template match="/">
+        <xsl:message>KPA: Analysis starts...</xsl:message>
         <html>
             <head>
                 <title>Kdenlive Project Disection</title>
 
                 <link rel="stylesheet" href="font-awesome/css/font-awesome.min.css"/>
-                <link rel="stylesheet" href="kdenlive-project-analyzer.css"/>
+                <link rel="stylesheet" href="style/kdenlive-project-analyzer.css"/>
             </head>
             <body>
                 <div id="report">
-                    <h1><img src="64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
+                    <h1><img src="images/64-apps-kdenlive.png" style="vertical-align: text-bottom; height: 2ex;"/>&#8201;Kdenlive Project Analysis</h1>
 
                     <p class="anno">Analysis script version: <xsl:value-of select="$version"/> / (c) 2016 Harald Albrecht / <a href="https://thediveo.github.io/kdenlive-project-analyzer/kdenlive-project-analyzer.html">Online</a> / <a href="https://thediveo.github.io/kdenlive-project-analyzer/">Project on GitHub</a></p>
 
