@@ -39,13 +39,15 @@ tt {
 ul.project-bin-contents,
 ul.project-bin-contents ul,
 ul.project-clips,
-ul.tracks {
+ul.tracks,
+ul.guides {
     list-style: none;
 }
 
 ul.project-bin-contents,
 ul.project-clips,
-ul.tracks {
+ul.tracks,
+ul.guides {
     padding-left: 0.5em;
 }
 

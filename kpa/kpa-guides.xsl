@@ -23,7 +23,11 @@
                 xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 
-    <!-- Gather all timeline guides.
+    <!-- Gather all timeline guides. Guides are stored inside the main bin
+         as properties whose names start with "kdenlive:guide.". Following
+         this prefix is a locale-based double that specifies the timeline
+         position of the guide, in seconds - but not frames! Finally, the
+         textual content is the descriptive title of the guide.
       -->
     <xsl:variable name="timeline-guides"
                   select="/mlt/playlist[@id='main bin']/property[starts-with(@name,'kdenlive:guide.')]"/>
@@ -35,14 +39,28 @@
     <xsl:template name="list-all-guides">
         <p><xsl:value-of select="$num-timeline-guides"/> timeline guides:</p>
 
-        <ul>
+        <xsl:variable name="fps" select="round(/mlt/profile/@frame_rate_num div /mlt/profile/@frame_rate_den)"/>
+
+        <ul class="guides">
             <xsl:for-each select="$timeline-guides">
+                <!-- Wikipedia: "The 22nd General Conference on Weights and Measures declared
+                     in 2003 that "the symbol for the decimal marker shall be either the point
+                     on the line or the comma on the line".
+                     cf: https://en.wikipedia.org/wiki/Decimal_mark
+                  -->
+                <xsl:variable name="guide-pos" select="number(translate(substring-after(@name, 'kdenlive:guide.'), ',', '.'))"/>
                 <li>
+                    <i class="fa fa-flag"/>&#160;
                     <b><xsl:value-of select="."/></b>:
-                    at <xsl:value-of select="substring-after(@name, 'kdenlive:guide.')"/>
+                    <i>at position</i>
+                    <xsl:call-template name="show-timecode">
+                        <xsl:with-param name="frames" select="$guide-pos * $fps"/>
+                    </xsl:call-template>
+                    (<xsl:value-of select="$guide-pos"/>)
                 </li>
             </xsl:for-each>
         </ul>
     </xsl:template>
+
 
 </xsl:stylesheet>

@@ -103,7 +103,7 @@
 
         <h2><i class="fa fa-flag" aria-hidden="true"/>Timeline Guides</h2>
 
-        <p>All timeline guides.</p>
+        <p>All the timeline guides.</p>
         <xsl:call-template name="list-all-guides"/>
 
 
