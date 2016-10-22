@@ -31,7 +31,7 @@
                 encoding="utf-8"
                 indent="yes"/>
 
-    <xsl:variable name="version" select="'0.9.11'"/>
+    <xsl:variable name="version" select="'0.9.12'"/>
 
 
     <!-- We later need this key to group clips by their "name", where "name" is
@@ -55,6 +55,7 @@
     <xsl:include href="kpa-project-statistics.xsl"/>
     <xsl:include href="kpa-project-bin.xsl"/>
     <xsl:include href="kpa-clips.xsl"/>
+    <xsl:include href="kpa-guides.xsl"/>
     <xsl:include href="kpa-track-icons.xsl"/>
     <xsl:include href="kpa-tracks.xsl"/>
     <xsl:include href="kpa-transitions.xsl"/>

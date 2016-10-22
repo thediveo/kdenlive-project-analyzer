@@ -101,6 +101,12 @@
         <xsl:call-template name="show-timeline-audio-mixing"/>
 
 
+        <h2><i class="fa fa-flag" aria-hidden="true"/>Timeline Guides</h2>
+
+        <p>All timeline guides.</p>
+        <xsl:call-template name="list-all-guides"/>
+
+
         <h2><i class="fa fa-th" aria-hidden="true"/> Master Clip List</h2>
 
         <p>All master clips from Kdenlive's project bin, flat, sorted by their names. In addition, derived producers are shown were created in the project.</p>
