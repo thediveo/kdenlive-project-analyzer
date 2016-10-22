@@ -34,7 +34,8 @@
     <xsl:variable name="num-timeline-guides" select="count($timeline-guides)"/>
 
 
-    <!-- List all timeline guides, with their names and positions.
+    <!-- List all timeline guides, with their names and positions. The positions
+         are given as timecodes.
       -->
     <xsl:template name="list-all-guides">
         <p><xsl:value-of select="$num-timeline-guides"/> timeline guides:</p>
@@ -43,6 +44,14 @@
 
         <ul class="guides">
             <xsl:for-each select="$timeline-guides">
+                <!-- Kdenlive stores guide positions not in frames, but instead as
+                     seconds and fractions (but not frames!) thereof. Of course,
+                     this floating point number is represented according to the
+                     locale indicated at the top-level mlt element. Sigh. So the
+                     following is a hack that assumes that decimal marks can only be
+                     "." or ",", and that no thousands separators are present - which
+                     aren't, luckily.
+                  -->
                 <!-- Wikipedia: "The 22nd General Conference on Weights and Measures declared
                      in 2003 that "the symbol for the decimal marker shall be either the point
                      on the line or the comma on the line".
@@ -52,11 +61,10 @@
                 <li>
                     <i class="fa fa-flag"/>&#160;
                     <b><xsl:value-of select="."/></b>:
-                    <i>at position</i>
+                    <i>at:</i>&#160;
                     <xsl:call-template name="show-timecode">
                         <xsl:with-param name="frames" select="$guide-pos * $fps"/>
                     </xsl:call-template>
-                    (<xsl:value-of select="$guide-pos"/>)
                 </li>
             </xsl:for-each>
         </ul>

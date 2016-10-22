@@ -101,7 +101,7 @@
         <xsl:call-template name="show-timeline-audio-mixing"/>
 
 
-        <h2><i class="fa fa-flag" aria-hidden="true"/>Timeline Guides</h2>
+        <h2><i class="fa fa-flag" aria-hidden="true"/> Timeline Guides</h2>
 
         <p>All the timeline guides.</p>
         <xsl:call-template name="list-all-guides"/>
