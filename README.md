@@ -12,6 +12,7 @@ The analyzer shows the following information:
   but in case your project exhibits odd audio mixing or video compositing behavior, this may be the place to check:
   - **video compositing transitions:** which ones and between which tracks, neatly sorted and grouped.
   - **audio mixing transitions:** which ones on which tracks.
+- **timeline guides**, with their names and positions.
 - **clip list**, just plain flat and sorted by name (no folders here).
 
 # Online Kdenlive Project Analyzer
