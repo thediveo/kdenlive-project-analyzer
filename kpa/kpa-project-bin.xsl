@@ -117,18 +117,26 @@
                  sorting. -->
             <xsl:sort select="concat(replace(property[@name='resource'],'.*/',''),property[@name='kdenlive:clipname'])" order="ascending"/>
             <xsl:variable name="clipid" select="@id"/>
-            <xsl:if test="not(contains($clipid,'_'))">
+            <!-- List only master clip producers, but never any derived producers.
+                 Derived producers are producers with an id that contains either '_'
+                 or ':' (special case of timewarp/speed producers).
+              -->
+            <xsl:if test="not(contains($clipid,'_')) and not(contains($clipid,':'))">
                 <li>
                     <xsl:choose>
-                        <!-- special case: built-in "black" clip -->
+                        <!-- Special case: the hidden built-in "black" clip -->
                         <xsl:when test="$clipid='black'">
                             <span class="anno"><i class="fa fa-eye-slash"/>&#160;<i>hidden built-in</i>&#160;<b>black</b> clip</span>
                         </xsl:when>
-                        <!-- all other non built-in clips -->
+                        <!-- Handle all other types of (non-built-in) clips -->
                         <xsl:otherwise>
                             <xsl:call-template name="clip-icon">
                                 <xsl:with-param name="clipid" select="$clipid"/>
                             </xsl:call-template>
+                            <!-- Either show the clip name (if one has been assigned by the user),
+                                 or show the original filename (sans path) when no clipname has
+                                 been set.
+                              -->
                             <xsl:choose>
                                 <xsl:when test="property[@name='kdenlive:clipname']">
                                     <xsl:value-of select="property[@name='kdenlive:clipname']"/>
@@ -138,9 +146,12 @@
                                 </xsl:otherwise>
                             </xsl:choose>
 
+                            <!-- Render a color patch in case of color clips; use the color
+                                 specified for the color clip. Neat, eh?!
+                              -->
                             <xsl:if test="property[@name='mlt_service']/text()='color'">
                                 <xsl:variable name="rgb" select="substring(property[@name='resource']/text(),3,6)"/>
-                                <xsl:text> </xsl:text><i class="fa fa-square" style="color: #{$rgb};"/>
+                                <xsl:text> </xsl:text><span class="color-square"><i class="fa fa-square" style="color: #{$rgb};"/></span>
                                 (RGB/A: <xsl:value-of select="$rgb"/>/<xsl:value-of select="substring(property[@name='resource']/text(),9,2)"/>)
                             </xsl:if>
 

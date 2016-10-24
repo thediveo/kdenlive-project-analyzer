@@ -62,7 +62,14 @@
     </xsl:template>
 
 
-    <!-- -->
+    <!-- Render a time code in hh:mm:ss:ff format, given a frame number/count. This takes
+         the project fps into account.
+
+         NOTE: drop frames are not properly considered for now.
+
+         Parameters:
+         * frames: a position or length as a number of frames.
+      -->
     <xsl:template name="show-timecode">
         <xsl:param name="frames"/>
 

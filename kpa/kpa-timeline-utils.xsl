@@ -121,36 +121,64 @@
     </xsl:template>
 
 
-    <!-- recursive function for finding the first video track -->
+    <!-- recursive function for finding the first (bottommost) video track;
+         this used to be of importance with the older automatic track compositing.
+         Newer track compositing differs slightly in that it now composes all
+         video tracks onto the bottom black track, as opposed to compositing all
+         video tracks onto the bottommost video track.
+
+         Parameters:
+         * mlt-track-idx: the (MLT) track index to check if it's a video track,
+                          and otherwise recursing using the next higher track;
+                          defaults to 1 (which is the first user-visible timeline
+                          track).
+      -->
     <xsl:template name="find-lowest-video-track">
         <xsl:param name="mlt-track-idx" select="1"/>
 
+        <!-- Exit recursion if (MLT) track index is beyond topmost track index. -->
         <xsl:if test="$mlt-track-idx &lt; $num-timeline-tracks">
             <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]"/>
             <xsl:variable name="track" select="/mlt/playlist[@id=$track-ref/@producer]"/>
 
             <xsl:choose>
-                <!-- audio-only track? search on! -->
+                <!-- audio-only track? Then search on and recurse! -->
                 <xsl:when test="$track/property[@name='kdenlive:audio_track']">
                     <xsl:call-template name="find-lowest-video-track">
                         <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx + 1"/>
                     </xsl:call-template>
                 </xsl:when>
-                <!-- try next upper track -->
+                <!-- we've found a video track, so we can terminate the recursion. -->
                 <xsl:otherwise><xsl:value-of select="$mlt-track-idx"/></xsl:otherwise>
             </xsl:choose>
         </xsl:if>
     </xsl:template>
 
 
+    <!-- (Slightly useless) Wrapper around the recursive template for determining
+         the lowest video track.
+      -->
     <xsl:variable name="timeline-lowest-video-track">
         <xsl:call-template name="find-lowest-video-track"/>
     </xsl:variable>
 
 
+    <!-- (Recursive) Template for calculating the overall (total) length
+         of the timeline.
+
+         Parameters:
+         * mlt-track-idx: the (MLT) track index from which to start calculating the
+                          overall timeline length; it is used for recursion.
+      -->
     <xsl:template name="max-timeline-length">
         <xsl:param name="mlt-track-idx" select="1"/>
 
+        <!-- We are actually more detailed here in calculating the length of a
+             specific track: while Kdenlive bases its own calculation solely on
+             the space occupied by clips (and blanks inbetween), we also take
+             those transitions into consideration that according to their A track
+             are "attached" to this specific track.
+          -->
         <xsl:variable name="transitions-track-len">
             <xsl:call-template name="calc-track-transitions-end">
                 <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
@@ -163,9 +191,17 @@
             </xsl:call-template>
         </xsl:variable>
 
-        <xsl:variable name="len">
+        <!-- Calculate the maximum of (transitions length, clips length) for this
+             specific track.
+          -->
+        <xsl:variable name="track-len">
             <xsl:choose>
-                <xsl:when test="$clips-track-len &gt;= $transitions-track-len">
+                <!-- Watch the subtle differences between XSLT 1.0 and 2.0: we cannot
+                     be lazy anymore when using the comparism binary operators; we need
+                     to tell XSLT here that we need to compare number-wise, but not
+                     string-wise.
+                  -->
+                <xsl:when test="number($clips-track-len) &gt;= number($transitions-track-len)">
                     <xsl:value-of select="$clips-track-len"/>
                 </xsl:when>
                 <xsl:otherwise>
@@ -175,22 +211,29 @@
         </xsl:variable>
 
         <xsl:choose>
-            <xsl:when test="$mlt-track-idx &lt; $num-timeline-tracks">
+            <!-- Check the length of this track against the longest track length of
+                 the tracks above this track; so, using recursion.
+              -->
+            <xsl:when test="number($mlt-track-idx) &lt; number($num-timeline-tracks)">
                 <xsl:variable name="maxlen">
                     <xsl:call-template name="max-timeline-length">
                         <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx + 1"/>
                     </xsl:call-template>
                 </xsl:variable>
                 <xsl:choose>
-                    <xsl:when test="$maxlen > $len"><xsl:value-of select="$maxlen"/></xsl:when>
-                    <xsl:otherwise><xsl:value-of select="$len"/></xsl:otherwise>
+                    <xsl:when test="number($maxlen) &gt; number($track-len)"><xsl:value-of select="$maxlen"/></xsl:when>
+                    <xsl:otherwise><xsl:value-of select="$track-len"/></xsl:otherwise>
                 </xsl:choose>
             </xsl:when>
-            <xsl:otherwise><xsl:value-of select="$len"/></xsl:otherwise>
+            <!-- Terminate recursion, as we've reached the topmost timeline track. -->
+            <xsl:otherwise><xsl:value-of select="$track-len"/></xsl:otherwise>
         </xsl:choose>
     </xsl:template>
 
 
+    <!-- Convenience template that outputs the overall (total) timeline length
+         in form of a neatly formatted time code.
+      -->
     <xsl:template name="show-timeline-length">
         <xsl:call-template name="show-timecode">
             <xsl:with-param name="frames">

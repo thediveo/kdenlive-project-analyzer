@@ -98,6 +98,10 @@ li {
     color: #900;
 }
 
+.color-square {
+    border: 1px solid #ccc;
+}
+
 .in-track {
     font-size: 80%;
     border-top: 0.3ex dotted;

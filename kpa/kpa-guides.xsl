@@ -38,7 +38,7 @@
          are given as timecodes.
       -->
     <xsl:template name="list-all-guides">
-        <p><xsl:value-of select="$num-timeline-guides"/> timeline guides:</p>
+        <p>Found <xsl:value-of select="$num-timeline-guides"/> timeline guides:</p>
 
         <xsl:variable name="fps" select="round(/mlt/profile/@frame_rate_num div /mlt/profile/@frame_rate_den)"/>
 
@@ -60,8 +60,10 @@
                 <xsl:variable name="guide-pos" select="number(translate(substring-after(@name, 'kdenlive:guide.'), ',', '.'))"/>
                 <li>
                     <i class="fa fa-flag"/>&#160;
-                    <b><xsl:value-of select="."/></b>:
-                    <i>at:</i>&#160;
+                    <!-- Guide name/title -->
+                    <b><xsl:value-of select="."/></b>
+                    <!-- Guide position in timeline -->
+                    at
                     <xsl:call-template name="show-timecode">
                         <xsl:with-param name="frames" select="$guide-pos * $fps"/>
                     </xsl:call-template>

@@ -353,12 +353,12 @@
              main <tractor> with id "maintractor". However, the Kdenlive
              tracks themselves are then represented as <playlists>. -->
         <xsl:if test="count(/mlt/playlist[@id='black_track']) != 1">
-            <xsl:call-template name="error-icon"/>&#160;The hidden built-in internal "Black" track is missing.
+            <xsl:call-template name="error-icon"/>&#160;The hidden built-in internal "Black" track is missing. This project seems to be severly corrupted!
         </xsl:if>
 
         <xsl:call-template name="show-timeline-compositing-info"/>
 
-        <p><xsl:value-of select="$num-timeline-user-tracks"/> <span class="anno"> (<i>+1 hidden built-in "Black" track</i>)</span> timeline tracks:</p>
+        <p>Found <xsl:value-of select="$num-timeline-user-tracks"/> <span class="anno"> (<i>+1</i>)</span> timeline tracks <span class="anno">(including the hidden built-in "Black" track)</span>:</p>
         <ul class="tracks">
             <xsl:for-each select="$timeline-tracks">
                 <!-- We only need this loop for counting MLT track indices...! -->
@@ -427,19 +427,38 @@
     </xsl:template>
 
 
-    <!-- Calculate total length of a track in frames, based on clips -->
+    <!-- Calculate total length of a track in frames, based on clips (and spaces).
+         Due to how MLT works, a track (or playlist) consists of a sequence of "entries"
+         (that is, clips) and "blanks" (the spaces inbetween). The only way to place an
+         entry at a particular point is to use a blank of appropriate length.
+
+         Parameters:
+         * mlt-track-idx: the 0-based (MLT) track index.
+
+         Result/Output:
+         * The length of the track in frames.
+      -->
     <xsl:template name="calc-track-length">
         <xsl:param name="mlt-track-idx"/>
 
+        <!-- Remember that XPath counts elements from 1 on, whereas the MLT track indices
+             are 0-based.
+          -->
         <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
+        <!-- The playlist element representing the timeline track; it then contains
+             the individual entry and blank elements that "fill" the track.
+          -->
         <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+
+        <!-- All the clips inside this track, as entry elements. -->
         <xsl:variable name="clips" select="$track-playlist/entry"/>
 
         <xsl:variable name="s" select="sum($track-playlist/blank/@length)"/>
         <xsl:variable name="i" select="sum($clips/@in)"/>
         <xsl:variable name="o" select="sum($clips/@out)"/>
         <!-- clip/entry lengths are actually out-in+1, so we need to correct the
-             sums calculated from outs-ins...
+             sums calculated from all outs-ins by adding the number of clips ...
+             yeah, this should be rewritten using XPATH 2.0 some day.
           -->
         <xsl:variable name="c" select="count($clips)"/>
         <xsl:value-of select="($o - $i) + $c + $s"/>
@@ -450,13 +469,19 @@
          compositing, et cetera.
 
          Parameters:
-         * track-idx: the 0-based (MLT) track index
+         * mlt-track-idx: the 0-based (MLT) track index
       -->
     <xsl:template name="show-track-info">
         <xsl:param name="mlt-track-idx"/>
 
+        <!-- Remember that XPath counts elements from 1 on, whereas the MLT track indices
+             are 0-based.
+          -->
         <xsl:variable name="track-ref" select="$timeline-tracks[$mlt-track-idx+1]/@producer"/>
-        <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
+         <!-- The playlist element representing the timeline track; it then contains
+             the individual entry and blank elements that "fill" the track.
+          -->
+       <xsl:variable name="track-playlist" select="/mlt/playlist[@id=$track-ref]"/>
 
         <xsl:call-template name="show-track-icon">
             <xsl:with-param name="mlt-track-idx" select="$mlt-track-idx"/>
@@ -498,7 +523,7 @@
         </span>
 
         <!-- internal information -->
-        <span class="anno-id"> (<i>track id: "<xsl:value-of select="$track-ref"/>", index: <xsl:value-of select="$mlt-track-idx"/></i>)</span>
+        <span class="anno-id"> (<i>id: "<xsl:value-of select="$track-ref"/>"</i>)</span>
     </xsl:template>
 
 
