@@ -48,7 +48,7 @@
             <xsl:if test="$num-timeline-user-tracks != $num-internally-added-mix-transitions">
                 <xsl:call-template name="warning-icon"/><span class="warning">Warning: </span>
             </xsl:if>
-            <xsl:value-of select="$num-internally-added-mix-transitions"/> internally added <i>mix</i> transitions (for <xsl:value-of select="$num-timeline-user-tracks"/>+1 tracks):
+            There are <xsl:value-of select="$num-internally-added-mix-transitions"/> internally added <i>mix</i> transitions (for <xsl:value-of select="$num-timeline-user-tracks"/>+1 tracks):
         </p>
 
         <ul class="tracks">
@@ -97,15 +97,15 @@
 
                                 --><xsl:if test="position() &gt; 1"><xsl:call-template name="error-icon"/>&#160;needless </xsl:if><!--
 
-                                --><span title="transition id">"<xsl:value-of select="@id"/>"</span>,
-                                <span title="MLT track indices">B/A:
-                                    <xsl:value-of select="$mlt-track-idx"/>/<!--
+                                -->id: <span title="transition id">"<xsl:value-of select="@id"/>"</span>,
+                                <span title="MLT track indices"><sup>B</sup>/<sub>A</sub>:
+                                    <sup><xsl:value-of select="$mlt-track-idx"/></sup>/<sub><!--
                                     --><xsl:choose>
                                         <xsl:when test="$a-track-idx != 0">
                                             <xsl:call-template name="error-icon"/>&#160;<span class="error"><xsl:value-of select="$a-track-idx"/> instead of 0</span>
                                         </xsl:when>
                                         <xsl:otherwise>0</xsl:otherwise>
-                                    </xsl:choose>
+                                    </xsl:choose></sub>
                                 </span></i>)
                             </xsl:for-each>
                             </span>

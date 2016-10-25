@@ -36,6 +36,10 @@ tt {
     font-family: monospace;
 }
 
+sup, sub {
+    font-size: 75%;
+}
+
 ul.project-bin-contents,
 ul.project-bin-contents ul,
 ul.project-clips,

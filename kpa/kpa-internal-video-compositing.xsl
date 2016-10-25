@@ -45,7 +45,7 @@
         </xsl:if>
 
         <p>
-            <xsl:value-of select="$num-internally-added-compositing-transitions"/> internally added automatic compositing transitions.
+            There are <xsl:value-of select="$num-internally-added-compositing-transitions"/> internally added automatic compositing transitions.
         </p>
 
         <ul class="tracks">
@@ -69,19 +69,19 @@
                     <xsl:variable name="class">
                         <xsl:choose>
                             <xsl:when test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) = 0)">anno</xsl:when>
-                            <xsl:when test="(($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)) or (($mlt-track-idx &gt; $timeline-lowest-video-track) and (count($track-comp-transitions) != 1))">error</xsl:when>
+                            <xsl:when test="(($mlt-track-idx &lt; $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)) or (($mlt-track-idx &gt; $timeline-lowest-video-track) and (count($track-comp-transitions) != 1))">error</xsl:when>
                             <xsl:otherwise></xsl:otherwise>
                         </xsl:choose>
                     </xsl:variable>
 
                     <span class="{$class}">
-                        <xsl:if test="not($timeline-compositing-mode = 'none') and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
+                        <xsl:if test="not($timeline-compositing-mode = 'none') and ($mlt-track-idx &gt;= $timeline-lowest-video-track)">
                              <i class="fa fa-film" aria-hidden="true" title="internally added compositing transition"/>
                         </xsl:if>
                         <xsl:if test="not($timeline-compositing-mode = 'none') and (count($track-comp-transitions) = 0) and ($mlt-track-idx &gt; $timeline-lowest-video-track)">
                             &#160;<xsl:call-template name="error-icon"/>&#160;missing video compositor
                         </xsl:if>
-                        <xsl:if test="($mlt-track-idx &lt;= $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)">
+                        <xsl:if test="($mlt-track-idx &lt; $timeline-lowest-video-track) and (count($track-comp-transitions) &gt; 0)">
                             &#160;<xsl:call-template name="error-icon"/>&#160;unneeded video compositor
                         </xsl:if>
                     </span>
@@ -106,14 +106,14 @@
 
                                 --><xsl:if test="position() &gt; 1">needless </xsl:if><!--
 
-                                --><span title="transition id">"<xsl:value-of select="@id"/>"</span>,
+                                -->id: <span title="transition id">"<xsl:value-of select="@id"/>"</span>,
 
-                                <span title="MLT track indices">B/A: <xsl:value-of select="$mlt-track-idx"/>/<xsl:if test="$a-track-idx != $timeline-lowest-video-track">
+                                <span title="MLT track indices"><sup>B</sup>/<sub>A</sub>: <sup><xsl:value-of select="$mlt-track-idx"/></sup>/<sub><xsl:if test="($a-track-idx != $timeline-lowest-video-track) and ($a-track-idx != 0)">
                                         <xsl:call-template name="error-icon"/><span class="error"><xsl:value-of select="$a-track-idx"/></span>
-                                    </xsl:if><xsl:if test="$a-track-idx = $timeline-lowest-video-track">
+                                    </xsl:if><xsl:if test="($a-track-idx = $timeline-lowest-video-track) or ($a-track-idx = 0)">
                                         <xsl:value-of select="$a-track-idx"/>
                                     </xsl:if>
-                                </span>,
+                                </sub></span>,
 
                                 <span title="transition type">type: <xsl:value-of select="property[@name='mlt_service']"/></span></i>)
                             </xsl:for-each>
